@@ -1,0 +1,42 @@
+[
+  {
+    "id": "polar_unified_conic",
+    "content": "极坐标统一圆锥曲线方程：以焦点为极点，对应准线垂直于极轴，方程为 r = ep/(1-e·cosθ)（准线在左）或 r = ep/(1+e·cosθ)（准线在右）。e<1 为椭圆，e=1 为抛物线，e>1 为双曲线。",
+    "latex_formula": "r=\\frac{ep}{1\\pm e\\cos\\theta},\\quad e<1\\text{(椭圆)},\\;e=1\\text{(抛物线)},\\;e>1\\text{(双曲线)}",
+    "topic": "polar",
+    "subtopic": "unified_conic",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "polar_conversion",
+    "content": "极坐标与直角坐标转换：x = r·cosθ，y = r·sinθ，r² = x²+y²，tanθ = y/x。极坐标方程转直角坐标：将 r² = x²+y²，r·cosθ = x，r·sinθ = y 代入。",
+    "latex_formula": "x=r\\cos\\theta,\\;y=r\\sin\\theta,\\;r^2=x^2+y^2",
+    "topic": "polar",
+    "subtopic": "conversion",
+    "difficulty_range": [2, 4]
+  },
+  {
+    "id": "polar_circle",
+    "content": "极坐标圆方程：以原点为圆心半径为a的圆：r = a。以(a,0)为圆心半径为a的圆（过原点）：r = 2a·cosθ。以(0,a)为圆心半径为a的圆：r = 2a·sinθ。",
+    "latex_formula": "r=a,\\quad r=2a\\cos\\theta,\\quad r=2a\\sin\\theta",
+    "topic": "polar",
+    "subtopic": "circle",
+    "difficulty_range": [2, 3]
+  },
+  {
+    "id": "polar_line",
+    "content": "极坐标直线方程：过极点的直线 θ = α（常数）。不过极点的直线：若直线到极点距离为d，法线方向角为α，则 r·cos(θ-α) = d。",
+    "latex_formula": "\\theta=\\alpha,\\quad r\\cos(\\theta-\\alpha)=d",
+    "topic": "polar",
+    "subtopic": "line",
+    "difficulty_range": [2, 4]
+  },
+  {
+    "id": "polar_area",
+    "content": "极坐标面积公式：极坐标曲线 r = f(θ) 在 α ≤ θ ≤ β 范围内围成的面积 S = (1/2)∫[α,β] r²dθ。两曲线 r₁ = f(θ)，r₂ = g(θ) 之间的面积 S = (1/2)∫[α,β] (r₁²-r₂²)dθ。",
+    "latex_formula": "S=\\frac{1}{2}\\int_\\alpha^\\beta r^2\\,d\\theta",
+    "topic": "polar",
+    "subtopic": "area",
+    "difficulty_range": [4, 5]
+  }
+]

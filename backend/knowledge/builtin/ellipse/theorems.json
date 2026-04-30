@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ellipse_standard_form",
+    "content": "椭圆标准方程：以原点为中心，焦点在x轴上时为 x²/a² + y²/b² = 1（a>b>0），焦点在y轴上时为 x²/b² + y²/a² = 1（a>b>0）。其中 c² = a² - b²，c 为半焦距，e = c/a 为离心率（0 < e < 1）。",
+    "latex_formula": "\\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1\\quad(a>b>0),\\quad c^2=a^2-b^2,\\quad e=\\frac{c}{a}",
+    "topic": "ellipse",
+    "subtopic": "standard_form",
+    "difficulty_range": [1, 2]
+  },
+  {
+    "id": "ellipse_focal_points",
+    "content": "椭圆焦点坐标：当焦点在x轴时，F₁(-c,0)，F₂(c,0)；当焦点在y轴时，F₁(0,-c)，F₂(0,c)。椭圆上任意一点P满足 |PF₁| + |PF₂| = 2a。",
+    "latex_formula": "F_1(-c,0),\\;F_2(c,0),\\quad|PF_1|+|PF_2|=2a",
+    "topic": "ellipse",
+    "subtopic": "focal_points",
+    "difficulty_range": [1, 3]
+  },
+  {
+    "id": "ellipse_focal_radius",
+    "content": "椭圆焦半径公式：椭圆上点P(x₀,y₀)到左焦点距离 r₁ = a + ex₀，到右焦点距离 r₂ = a - ex₀，其中 e = c/a 为离心率。",
+    "latex_formula": "r_1=a+ex_0,\\quad r_2=a-ex_0,\\quad e=\\frac{c}{a}",
+    "topic": "ellipse",
+    "subtopic": "focal_radius",
+    "difficulty_range": [2, 4]
+  },
+  {
+    "id": "ellipse_focal_chord",
+    "content": "椭圆过焦点的弦（焦点弦）：过焦点F作弦AB，设弦的倾斜角为θ，则弦长 |AB| = 2ab²/(a²-c²cos²θ) = 2b²/a · 1/(1-e²cos²θ)。通径（过焦点垂直于长轴的弦）长为 2b²/a。",
+    "latex_formula": "|AB|=\\frac{2b^2/a}{1-e^2\\cos^2\\theta},\\quad\\text{通径}=\\frac{2b^2}{a}",
+    "topic": "ellipse",
+    "subtopic": "focal_chord",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "ellipse_tangent_line",
+    "content": "椭圆切线方程：椭圆 x²/a² + y²/b² = 1 上点 P(x₀,y₀) 处的切线方程为 x·x₀/a² + y·y₀/b² = 1。斜率为 k 的切线方程为 y = kx ± √(a²k²+b²)。",
+    "latex_formula": "\\frac{x\\cdot x_0}{a^2}+\\frac{y\\cdot y_0}{b^2}=1,\\quad y=kx\\pm\\sqrt{a^2k^2+b^2}",
+    "topic": "ellipse",
+    "subtopic": "tangent_line",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "ellipse_area_triangle",
+    "content": "椭圆焦点三角形面积：设椭圆上点P与两焦点F₁、F₂构成三角形，∠F₁PF₂ = 2α，则面积 S = b²·tan(α)。利用余弦定理：|F₁F₂|² = |PF₁|² + |PF₂|² - 2|PF₁||PF₂|cos(∠F₁PF₂)。",
+    "latex_formula": "S_{\\triangle PF_1F_2}=b^2\\tan\\alpha,\\quad\\cos\\angle F_1PF_2=\\frac{|PF_1|^2+|PF_2|^2-4c^2}{2|PF_1||PF_2|}",
+    "topic": "ellipse",
+    "subtopic": "area_triangle",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "ellipse_optical_property",
+    "content": "椭圆光学性质：从一个焦点发出的光线，经椭圆反射后必过另一个焦点。即椭圆上任意点处的法线平分两焦半径的夹角。",
+    "latex_formula": "\\text{入射角} = \\text{反射角（关于法线）}",
+    "topic": "ellipse",
+    "subtopic": "optical_property",
+    "difficulty_range": [4, 5]
+  },
+  {
+    "id": "ellipse_parametric",
+    "content": "椭圆参数方程：x = a·cosθ，y = b·sinθ，θ ∈ [0, 2π)。椭圆面积 S = πab。",
+    "latex_formula": "x=a\\cos\\theta,\\;y=b\\sin\\theta,\\quad S=\\pi ab",
+    "topic": "ellipse",
+    "subtopic": "parametric",
+    "difficulty_range": [2, 4]
+  }
+]

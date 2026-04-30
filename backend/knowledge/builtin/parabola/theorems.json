@@ -1,0 +1,42 @@
+[
+  {
+    "id": "parabola_standard_form",
+    "content": "抛物线标准方程：开口向右 y² = 2px（p>0），焦点(p/2,0)，准线 x = -p/2；开口向左 y² = -2px，焦点(-p/2,0)，准线 x = p/2；开口向上 x² = 2py，焦点(0,p/2)，准线 y = -p/2；开口向下 x² = -2py，焦点(0,-p/2)，准线 y = p/2。",
+    "latex_formula": "y^2=2px\\;(p>0),\\quad\\text{焦点}\\left(\\frac{p}{2},0\\right),\\quad\\text{准线}x=-\\frac{p}{2}",
+    "topic": "parabola",
+    "subtopic": "standard_form",
+    "difficulty_range": [1, 2]
+  },
+  {
+    "id": "parabola_focal_radius",
+    "content": "抛物线焦半径：抛物线 y² = 2px 上点P(x₀,y₀)到焦点距离 r = x₀ + p/2（焦点到准线距离定义）。即焦半径等于点到准线的距离。",
+    "latex_formula": "r=x_0+\\frac{p}{2}=\\frac{2px_0+p^2/2\\cdot2}{2p}",
+    "topic": "parabola",
+    "subtopic": "focal_radius",
+    "difficulty_range": [2, 3]
+  },
+  {
+    "id": "parabola_focal_chord",
+    "content": "抛物线焦点弦：过焦点的弦AB，设端点为A(x₁,y₁)，B(x₂,y₂)，则 x₁x₂ = p²/4，y₁y₂ = -p²，弦长 |AB| = x₁+x₂+p。通径（过焦点垂直轴的弦）长为 2p。",
+    "latex_formula": "x_1x_2=\\frac{p^2}{4},\\;y_1y_2=-p^2,\\;|AB|=x_1+x_2+p,\\;\\text{通径}=2p",
+    "topic": "parabola",
+    "subtopic": "focal_chord",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "parabola_tangent_line",
+    "content": "抛物线切线：y² = 2px 上点P(x₀,y₀)处切线为 y·y₀ = p(x+x₀)。斜率为k的切线：y = kx + p/(2k)，切点为(p/(2k²), p/k)。",
+    "latex_formula": "yy_0=p(x+x_0),\\quad y=kx+\\frac{p}{2k}",
+    "topic": "parabola",
+    "subtopic": "tangent_line",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "parabola_reflection",
+    "content": "抛物线反射性质：从焦点发出的光线，经抛物线反射后平行于轴；平行于轴的光线，经反射后过焦点。这是探照灯和卫星天线的工作原理。",
+    "latex_formula": "\\text{焦点发出的光线经反射后平行于对称轴}",
+    "topic": "parabola",
+    "subtopic": "reflection_property",
+    "difficulty_range": [3, 5]
+  }
+]

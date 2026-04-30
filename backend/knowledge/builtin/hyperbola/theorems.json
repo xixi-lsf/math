@@ -1,0 +1,50 @@
+[
+  {
+    "id": "hyperbola_standard_form",
+    "content": "双曲线标准方程：以原点为中心，实轴在x轴时为 x²/a² - y²/b² = 1（a>0,b>0），实轴在y轴时为 y²/a² - x²/b² = 1。其中 c² = a² + b²，e = c/a > 1。",
+    "latex_formula": "\\frac{x^2}{a^2}-\\frac{y^2}{b^2}=1,\\quad c^2=a^2+b^2,\\quad e=\\frac{c}{a}>1",
+    "topic": "hyperbola",
+    "subtopic": "standard_form",
+    "difficulty_range": [1, 2]
+  },
+  {
+    "id": "hyperbola_asymptotes",
+    "content": "双曲线渐近线：x²/a² - y²/b² = 1 的渐近线为 y = ±(b/a)x，即 bx ± ay = 0。渐近线过原点，双曲线无限趋近但不相交渐近线。",
+    "latex_formula": "y=\\pm\\frac{b}{a}x,\\quad bx\\pm ay=0",
+    "topic": "hyperbola",
+    "subtopic": "asymptotes",
+    "difficulty_range": [2, 3]
+  },
+  {
+    "id": "hyperbola_focal_radius",
+    "content": "双曲线焦半径：双曲线 x²/a² - y²/b² = 1 上点P(x₀,y₀)，到左焦点 r₁ = |ex₀+a|，到右焦点 r₂ = |ex₀-a|。右支上：r₁ = ex₀+a，r₂ = ex₀-a；左支上：r₁ = -ex₀-a，r₂ = -ex₀+a。",
+    "latex_formula": "r_1=|ex_0+a|,\\quad r_2=|ex_0-a|,\\quad||PF_1|-|PF_2||=2a",
+    "topic": "hyperbola",
+    "subtopic": "focal_radius",
+    "difficulty_range": [2, 4]
+  },
+  {
+    "id": "hyperbola_focal_chord",
+    "content": "双曲线焦点弦：过焦点的弦长公式与椭圆类似，通径（过焦点垂直实轴的弦）长为 2b²/a。",
+    "latex_formula": "\\text{通径}=\\frac{2b^2}{a}",
+    "topic": "hyperbola",
+    "subtopic": "focal_chord",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "hyperbola_tangent_line",
+    "content": "双曲线切线：x²/a² - y²/b² = 1 上点P(x₀,y₀)处切线为 x·x₀/a² - y·y₀/b² = 1。斜率为k的切线：y = kx ± √(a²k²-b²)（需 |k| > b/a）。",
+    "latex_formula": "\\frac{x\\cdot x_0}{a^2}-\\frac{y\\cdot y_0}{b^2}=1,\\quad y=kx\\pm\\sqrt{a^2k^2-b^2}",
+    "topic": "hyperbola",
+    "subtopic": "tangent_line",
+    "difficulty_range": [3, 5]
+  },
+  {
+    "id": "hyperbola_rectangular",
+    "content": "等轴双曲线（直角双曲线）：a = b 时，方程为 x² - y² = a²，渐近线为 y = ±x（互相垂直）。离心率 e = √2。",
+    "latex_formula": "x^2-y^2=a^2,\\quad e=\\sqrt{2},\\quad\\text{渐近线}y=\\pm x",
+    "topic": "hyperbola",
+    "subtopic": "rectangular_hyperbola",
+    "difficulty_range": [2, 4]
+  }
+]

@@ -23,9 +23,14 @@ from sympy import sympify, sqrt, cos, sin, pi, lambdify, symbols
 
 from models.problem import ProblemParams, LineParams, Point
 
-
+"""
+绘图模块的快速路径实现，
+负责使用本地模板函数直接生成常见圆锥曲线的配图，避免调用 LLM 生成代码
+"""
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
+"""
+将 Matplotlib 图形保存到内存 BytesIO，编码为 PNG，再转为 Base64 字符串
+"""
 def _fig_to_b64(fig: plt.Figure) -> str:
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=120, bbox_inches="tight")
@@ -33,20 +38,29 @@ def _fig_to_b64(fig: plt.Figure) -> str:
     buf.seek(0)
     return base64.b64encode(buf.read()).decode()
 
-
+"""
+创建图形和坐标轴
+"""
 def _setup_axes(params: ProblemParams) -> tuple[plt.Figure, plt.Axes]:
     fig, ax = plt.subplots(figsize=(7, 6))
+    #设置 x/y 范围
     ax.set_xlim(*params.plot_range_x)
     ax.set_ylim(*params.plot_range_y)
+    #绘制黑色坐标轴
     ax.axhline(0, color="black", linewidth=0.8)
     ax.axvline(0, color="black", linewidth=0.8)
+    #纵横比一致
     ax.set_aspect("equal")
+    #是否显示虚线网格
     if params.show_grid:
         ax.grid(True, linestyle="--", alpha=0.4)
     ax.tick_params(labelsize=9)
+    #fig是画布，ax是坐标系
     return fig, ax
 
-
+"""
+遍历 params.key_points,画点
+"""
 def _draw_points(ax: plt.Axes, points: list[Point]) -> None:
     for pt in points:
         px, py = pt.to_float()
@@ -58,7 +72,9 @@ def _draw_points(ax: plt.Axes, points: list[Point]) -> None:
             fontsize=11,
         )
 
-
+"""
+画线
+"""
 def _draw_lines(ax: plt.Axes, lines: list[LineParams], x_range: tuple) -> None:
     x_arr = np.linspace(x_range[0], x_range[1], 400)
     for line in lines:
@@ -84,6 +100,7 @@ def draw_ellipse(params: ProblemParams) -> str:
     a = float(sympify(c.a))
     b = float(sympify(c.b))
 
+    #画坐标轴，创建图形
     fig, ax = _setup_axes(params)
     theta = np.linspace(0, 2 * np.pi, 1000)
     if c.orientation == "horizontal":
@@ -91,6 +108,9 @@ def draw_ellipse(params: ProblemParams) -> str:
     else:
         ax.plot(b * np.cos(theta), a * np.sin(theta), "k-", linewidth=2)
 
+    """
+    调用 _draw_lines 和 _draw_points画点和线，这样调用draw_ellipse得到的不只是椭圆，是组合图形
+    """
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
     ax.set_title(f"椭圆 $\\frac{{x^2}}{{{_fmt(a**2)}}}+\\frac{{y^2}}{{{_fmt(b**2)}}}=1$", fontsize=12)
@@ -98,7 +118,7 @@ def draw_ellipse(params: ProblemParams) -> str:
 
 
 # ── Hyperbola ─────────────────────────────────────────────────────────────────
-
+#双曲线（也画出了渐近线）
 def draw_hyperbola(params: ProblemParams) -> str:
     c = params.conic
     a = float(sympify(c.a))
@@ -107,6 +127,7 @@ def draw_hyperbola(params: ProblemParams) -> str:
     fig, ax = _setup_axes(params)
     t = np.linspace(-2.5, 2.5, 800)
 
+    #通过 params.conic.orientation 字段区分水平和竖直
     if c.orientation == "horizontal":
         # Right branch
         ax.plot(a * np.cosh(t), b * np.sinh(t), "k-", linewidth=2)
@@ -139,6 +160,7 @@ def draw_parabola(params: ProblemParams) -> str:
     fig, ax = _setup_axes(params)
     t = np.linspace(*params.plot_range_y, 800)
 
+    #开口方向
     if direction == "right":
         y_arr = t
         x_arr = y_arr ** 2 / (2 * p)
@@ -199,7 +221,11 @@ def draw_polar_conic(params: ProblemParams) -> str:
 
 
 # ── Dispatcher ────────────────────────────────────────────────────────────────
-
+"""
+drawing_retry == 0 时，会首先调用 try_local_draw(params) 尝试本地绘图
+如果当前题目的曲线类型和参数满足预设模板,直接绘制并返回 Base64 编码的 PNG 图片
+若不支持（例如有旋转、倾斜直线等复杂情况），则抛出 NotImplementedError，由上层降级到慢速路径（LLM 生成代码 + 沙箱执行）
+"""
 def try_local_draw(params: ProblemParams) -> str:
     """
     Attempt to draw using local template functions.

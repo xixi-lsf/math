@@ -2,6 +2,9 @@
 Node 5: Adaptive drawing dispatch.
 Fast path: local template functions.
 Slow path: LLM generates Matplotlib code → sandbox execution.
+为生成的数学题目自动配图（例如椭圆、双曲线、抛物线及其关键点、直线等），
+将图片以 Base64 编码的 PNG 存入状态
+自适应双路径策略
 """
 from __future__ import annotations
 from agent.state import AgentState
@@ -13,12 +16,14 @@ _MAX_DRAWING_RETRIES = 3
 
 
 def drawing_node(state: AgentState) -> dict:
+    #获取参数，当前已重试次数，上次错误记录
     params = state.get("params")
     step_id = state.get("step_counter", 0)
     drawing_retry = state.get("drawing_retry_count", 0)
     prev_error = state.get("drawing_error")
 
     # ── Fast path: try local template ────────────────────────────────────────
+    #仅在第一次进入绘图节点时（drawing_retry == 0）尝试快速路径
     if drawing_retry == 0:
         try:
             image_b64 = try_local_draw(params)
@@ -60,7 +65,9 @@ def drawing_node(state: AgentState) -> dict:
         }
 
     # Generate drawing code via LLM
+    #利用 LLM 生成 Python/Matplotlib 代码
     code = _generate_drawing_code(state, prev_error)
+    #沙箱执行代码
     image_b64, error = execute_drawing_code(code, params)
 
     if error:
@@ -97,7 +104,7 @@ def drawing_node(state: AgentState) -> dict:
         "step_counter": step_id + 1,
     }
 
-
+#生成绘图代码函数
 def _generate_drawing_code(state: AgentState, prev_error: str | None) -> str:
     from openai import OpenAI
     cfg = state.get("llm_config", {})

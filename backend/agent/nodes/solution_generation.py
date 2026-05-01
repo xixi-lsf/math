@@ -1,5 +1,8 @@
 """
 Node 6: Solution generation (on-demand).
+在题目生成、参数提取（以及可能的绘图之后），
+调用 LLM 生成详细的解题过程（LaTeX 格式），
+并将结果存入状态中的 solution_latex 字段。
 """
 from __future__ import annotations
 from agent.state import AgentState
@@ -7,6 +10,7 @@ from models.problem import ReasoningStep
 
 
 def solution_generation_node(state: AgentState) -> dict:
+    #读取参数，文本问题，计数器
     params = state.get("params")
     latex_problem = state.get("latex_problem", "")
     step_id = state.get("step_counter", 0)
@@ -19,7 +23,7 @@ def solution_generation_node(state: AgentState) -> dict:
     )
     model = cfg.get("model", "gpt-4o-mini")
 
-    # Build parameter context for LLM
+    # 构建参数上下文（供 LLM 参考），仅提取圆锥曲线的基础参数
     param_ctx = ""
     if params:
         c = params.conic

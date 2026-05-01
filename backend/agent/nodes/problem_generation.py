@@ -1,6 +1,7 @@
 """
-Node 2: Problem generation — LLM freely generates a LaTeX problem statement.
-Node 3: Parameter extraction — LLM extracts structured ProblemParams JSON from the statement.
+题目生成+参数提取
+Node 2: Problem generation — 调用 LLM 根据主题、难度、检索到的知识片段，自由生成一道数学题目的 LaTeX 题干
+Node 3: Parameter extraction — 调用LLM，从上一步生成的题干中提取结构化参数，组装成 ProblemParams 对象
 """
 from __future__ import annotations
 import json
@@ -13,6 +14,7 @@ from models.problem import (
 )
 from models.knowledge import KnowledgeChunk
 
+#难度提示词
 _DIFFICULTY_HINTS = {
     1: "基础题，直接代入公式即可，无需复杂推导",
     2: "简单题，需要一步推导，答案为整数或简单分数",
@@ -28,7 +30,7 @@ _TOPIC_NAMES = {
     "polar": "极坐标圆锥曲线",
 }
 
-
+#从状态中读取 llm_config，动态创建 OpenAI 客户端实例
 def _get_llm(state: AgentState) -> OpenAI:
     cfg = state.get("llm_config", {})
     return OpenAI(
@@ -36,7 +38,8 @@ def _get_llm(state: AgentState) -> OpenAI:
         base_url=cfg.get("base_url", "https://api.openai.com/v1"),
     )
 
-
+#将从知识库检索到的 KnowledgeChunk 对象（包含内容文本和 LaTeX 公式）格式化为字符串，供 LLM 参考
+#最多取前 6 个片段，避免超出上下文窗口
 def _knowledge_context(chunks: list[KnowledgeChunk]) -> str:
     if not chunks:
         return "（无检索结果）"
@@ -58,10 +61,12 @@ def problem_generation_node(state: AgentState) -> dict:
     cfg = state.get("llm_config", {})
     model = cfg.get("model", "gpt-4o-mini")
 
+    #获取topic,难度提示词，从知识库检索的知识（字符串）
     topic_cn = _TOPIC_NAMES.get(topic, topic)
     difficulty_hint = _DIFFICULTY_HINTS.get(difficulty, "")
     knowledge_ctx = _knowledge_context(chunks)
 
+    #重试提示：将 validation_result 中的错误详情和建议修正加入提示，引导 LLM 改进
     retry_hint = ""
     if retry_count > 0:
         prev_result = state.get("validation_result")
@@ -94,6 +99,9 @@ def problem_generation_node(state: AgentState) -> dict:
         temperature=0.8,
         max_tokens=600,
     )
+    #response.choices：一个列表，包含模型生成的多个候选回复
+    #choices[0]：取第一个候选
+    #.message：该候选中的 message 对象，包含 role（assistant）和 content（文本内容）
     latex_problem = response.choices[0].message.content.strip()
 
     step = ReasoningStep(
@@ -105,6 +113,7 @@ def problem_generation_node(state: AgentState) -> dict:
         tool_output_summary=latex_problem[:120] + ("..." if len(latex_problem) > 120 else ""),
     )
 
+    #生成的题目文本，追加一条推理记录，步骤计数器+1
     return {
         "latex_problem": latex_problem,
         "reasoning_trace": state.get("reasoning_trace", []) + [step],
@@ -113,7 +122,7 @@ def problem_generation_node(state: AgentState) -> dict:
 
 
 # ── Node: param_extraction ────────────────────────────────────────────────────
-
+#描述期望提取的参数格式
 _PARAM_SCHEMA = {
     "type": "object",
     "properties": {
@@ -187,6 +196,7 @@ def param_extraction_node(state: AgentState) -> dict:
         max_tokens=800,
     )
 
+    #解析 JSON 并构建对象
     raw_json = response.choices[0].message.content.strip()
     data = json.loads(raw_json)
 

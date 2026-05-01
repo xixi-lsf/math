@@ -19,7 +19,7 @@ echo Backend : http://localhost:8001
 echo Frontend: http://localhost:5173
 echo API Docs: http://localhost:8001/docs
 echo.
-timeout /t 3 /nobreak >nul
+timeout /t 10 /nobreak >nul
 start http://localhost:5173
 
 endlocal

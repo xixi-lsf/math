@@ -28,8 +28,22 @@ def _gt(a, b) -> bool:
 
 
 def validate_params(params: ProblemParams) -> ValidationResult:
-    """Entry point: always pass, let drawing handle errors."""
-    return ValidationResult(is_valid=True)
+    """Dispatch to the appropriate validator based on curve_type."""
+    curve_type = params.conic.curve_type
+    if curve_type == "polar_conic":
+        return ValidationResult(is_valid=True)
+    dispatch = {
+        "ellipse": _validate_ellipse,
+        "hyperbola": _validate_hyperbola,
+        "parabola": _validate_parabola,
+    }
+    validator = dispatch.get(curve_type)
+    if validator is None:
+        return ValidationResult(is_valid=True)
+    try:
+        return validator(params)
+    except Exception:
+        return ValidationResult(is_valid=True)
 
 
 # ── Ellipse ───────────────────────────────────────────────────────────────────

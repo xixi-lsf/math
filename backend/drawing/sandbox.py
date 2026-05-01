@@ -1,6 +1,8 @@
 """
 Sandbox executor for LLM-generated Matplotlib drawing code (slow path).
 Runs code in a subprocess with a timeout to prevent hangs or crashes.
+绘图模块慢速路径的核心执行器，负责在安全沙箱中运行 LLM 生成的 Matplotlib 代码，
+并捕获生成的图片（Base64）或错误信息。
 """
 from __future__ import annotations
 import base64
@@ -12,9 +14,9 @@ from pathlib import Path
 
 from models.problem import ProblemParams
 
-
+#子进程最长允许运行 20 秒
 _TIMEOUT_SECONDS = 20
-
+#定义了子进程中将要执行的完整 Python 脚本框架
 _HARNESS_TEMPLATE = '''
 import sys, base64, io, json
 import matplotlib
@@ -23,21 +25,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sympy import sympify
 
-# ── Injected parameters (do NOT modify these values) ──────────────────────────
+# ── Injected parameters 参数注入模块(do NOT modify these values) ──────────────────────────
 {param_block}
 
-# ── LLM-generated drawing code ────────────────────────────────────────────────
+# ── LLM-generated drawing codeLLM 生成的绘图代码 ────────────────────────────────────────────────
 {user_code}
 
-# ── Capture output ────────────────────────────────────────────────────────────
+# ── Capture output将当前图形保存为 PNG 到内存缓冲区，然后 Base64 编码并打印到标准输出─────────
 buf = io.BytesIO()
 plt.savefig(buf, format="png", dpi=120, bbox_inches="tight")
 plt.close("all")
 buf.seek(0)
+#子进程与父进程通信的唯一通道：父进程通过捕获子进程的 stdout 来获取 Base64 字符串
 print(base64.b64encode(buf.read()).decode(), end="")
 '''
 
-
+#将 ProblemParams 对象中的数学参数转换为可供 LLM 代码直接使用的 Python 变量赋值语句
+#LLM 生成的代码就可以直接使用 a, b, F1_x, F1_y 等变量名，而不必嵌入硬编码数字
 def _build_param_block(params: ProblemParams) -> str:
     """
     Build a Python variable block from ProblemParams so the LLM code
@@ -83,12 +87,15 @@ def execute_drawing_code(code: str, params: ProblemParams) -> tuple[str, str | N
         On success: (base64_str, None)
         On failure: ("", error_message)
     """
+    #调用 _build_param_block(params) 得到变量定义语句
     param_block = _build_param_block(params)
+    #将参数块和用户代码嵌入模板
     script = _HARNESS_TEMPLATE.format(
         param_block=param_block,
         user_code=textwrap.dedent(code),
     )
 
+    #生成一个 .py 文件，将脚本写入磁盘
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".py", delete=False, encoding="utf-8"
     ) as f:
@@ -96,12 +103,14 @@ def execute_drawing_code(code: str, params: ProblemParams) -> tuple[str, str | N
         tmp_path = f.name
 
     try:
+        #启动子进程
         result = subprocess.run(
             [sys.executable, tmp_path],
             capture_output=True,
             text=True,
             timeout=_TIMEOUT_SECONDS,
         )
+        #执行出错
         if result.returncode != 0:
             return "", result.stderr.strip()
         output = result.stdout.strip()

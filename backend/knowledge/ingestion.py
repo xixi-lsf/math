@@ -1,5 +1,7 @@
 """
 Document ingestion: parse PDF/TXT/MD files and add to user_documents collection.
+实现了文档摄取功能，允许用户上传 PDF、DOCX、TXT/Markdown 文件，
+将内容分块后存入向量数据库（ChromaDB）的用户文档集合中，供后续知识检索使用
 """
 from __future__ import annotations
 import hashlib
@@ -32,7 +34,7 @@ def _read_docx(path: Path) -> str:
     doc = Document(str(path))
     return "\n".join(p.text for p in doc.paragraphs)
 
-
+#参数：文件路径，主题
 def ingest_file(file_path: Union[str, Path], topic: str = "general") -> int:
     """
     Parse a file and add its chunks to the user_documents collection.
@@ -49,6 +51,9 @@ def ingest_file(file_path: Union[str, Path], topic: str = "general") -> int:
         text = path.read_text(encoding="utf-8", errors="ignore")
 
     chunks = _chunk_text(text)
+    #store提供两个相关方法：
+    # add_user_document()将文本块插入名为 "user_documents" 的集合
+
     store = get_store()
     added = 0
     for idx, chunk in enumerate(chunks):

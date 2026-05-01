@@ -24,13 +24,14 @@ _BUILTIN_DIR = _BASE_DIR / "builtin"
 _CHROMA_DIR = _BASE_DIR / "chroma_db"
 
 # ── Embedding function ────────────────────────────────────────────────────────
-
+#关键词嵌入
 class _KeywordEmbeddingFunction:
     """
     Lightweight keyword-based embedding (no model download).
     Uses a fixed vocabulary of math terms to create sparse vectors.
     Good enough for small knowledge bases (<200 documents).
     """
+    #维护一个固定的数学词汇表
     _VOCAB = [
         "椭圆", "双曲线", "抛物线", "极坐标", "焦点", "准线", "渐近线",
         "切线", "法线", "弦", "通径", "焦点弦", "离心率", "半长轴", "半短轴",
@@ -52,14 +53,17 @@ class _KeywordEmbeddingFunction:
             result.append([v / norm for v in vec])
         return result
 
-
+#嵌入函数
 def _make_embed_fn():
     # Try sentence-transformers (already downloaded)
     try:
         import sentence_transformers  # noqa: F401
+        # 查找缓存目录下是否存在以 "models--sentence-transformers" 开头的文件夹
         cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
         model_dirs = list(cache_dir.glob("models--sentence-transformers*"))
+        # 如果存在，说明模型已下载
         if model_dirs:
+            # 返回 ChromaDB 内置的 SentenceTransformer 嵌入函数
             return embedding_functions.SentenceTransformerEmbeddingFunction(
                 model_name="paraphrase-multilingual-MiniLM-L12-v2"
             )
@@ -75,6 +79,10 @@ _EMBED_FN = _make_embed_fn()
 class KnowledgeStore:
     """Thin wrapper around ChromaDB for retrieval and ingestion."""
 
+    #PersistentClient 将向量数据持久化到磁盘（chroma_db 目录），下次启动无需重新加载
+    #创建了两个 ChromaDB 集合，这两个集合数据隔离
+    #_theorems：存储内置知识和网络搜索结果
+    #_user_docs：存储用户上传文档
     def __init__(self, persist_dir: Optional[str] = None):
         path = persist_dir or str(_CHROMA_DIR)
         self._client = chromadb.PersistentClient(path=path)
@@ -87,9 +95,13 @@ class KnowledgeStore:
 
     # ── Ingestion ─────────────────────────────────────────────────────────────
 
+    #内置知识加载
+    #self 指向 KnowledgeStore 对象
     def load_builtin(self) -> int:
         """Load all builtin JSON files into the theorems collection. Returns count added."""
         added = 0
+        #扫描 knowledge/builtin/ 目录下的所有子文件夹（按主题划分）
+        #读取里面的JSON文件，每个 JSON 文件是一个 KnowledgeChunk 对象列表
         for topic_dir in _BUILTIN_DIR.iterdir():
             if not topic_dir.is_dir():
                 continue
@@ -115,6 +127,7 @@ class KnowledgeStore:
                     added += 1
         return added
 
+    #添加用户文档
     def add_user_document(self, doc_id: str, text: str, metadata: dict) -> None:
         """Add a user-uploaded document chunk."""
         self._user_docs.add(
@@ -123,6 +136,7 @@ class KnowledgeStore:
             metadatas=[{**metadata, "source": "user_upload"}],
         )
 
+    #缓存网络结果
     def add_web_result(self, chunk: KnowledgeChunk) -> None:
         """Cache a web-search result into the theorems collection."""
         self._theorems.add(

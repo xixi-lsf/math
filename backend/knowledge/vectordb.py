@@ -8,6 +8,7 @@ Embedding strategy (in priority order):
 3. Simple keyword-based fallback (no download needed)
 """
 from __future__ import annotations
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -98,34 +99,62 @@ class KnowledgeStore:
     #内置知识加载
     #self 指向 KnowledgeStore 对象
     def load_builtin(self) -> int:
-        """Load all builtin JSON files into the theorems collection. Returns count added."""
-        added = 0
-        #扫描 knowledge/builtin/ 目录下的所有子文件夹（按主题划分）
-        #读取里面的JSON文件，每个 JSON 文件是一个 KnowledgeChunk 对象列表
-        for topic_dir in _BUILTIN_DIR.iterdir():
+        """增量加载内置知识库。内容无变化时直接跳过，有变化时重建 collection。"""
+        # 第一步：收集所有 builtin chunks
+        all_chunks: list[dict] = []
+        for topic_dir in sorted(_BUILTIN_DIR.iterdir()):
             if not topic_dir.is_dir():
                 continue
-            for json_file in topic_dir.glob("*.json"):
+            for json_file in sorted(topic_dir.glob("*.json")):
                 chunks: list[dict] = json.loads(json_file.read_text(encoding="utf-8"))
-                for chunk in chunks:
-                    # Skip if already present
-                    existing = self._theorems.get(ids=[chunk["id"]])
-                    if existing["ids"]:
-                        continue
-                    self._theorems.add(
-                        ids=[chunk["id"]],
-                        documents=[chunk["content"]],
-                        metadatas=[{
-                            "latex_formula": chunk.get("latex_formula", ""),
-                            "topic": chunk.get("topic", ""),
-                            "subtopic": chunk.get("subtopic", ""),
-                            "difficulty_min": chunk.get("difficulty_range", [1, 5])[0],
-                            "difficulty_max": chunk.get("difficulty_range", [1, 5])[1],
-                            "source": "builtin",
-                        }],
-                    )
-                    added += 1
-        return added
+                all_chunks.extend(chunks)
+
+        # 第二步：计算整体内容哈希
+        content_hash = hashlib.md5(
+            json.dumps(all_chunks, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+
+        # 第三步：检查已存储的哈希标记
+        try:
+            existing = self._theorems.get(ids=["__builtin_hash__"])
+            if existing["ids"] and existing["documents"][0] == content_hash:
+                print(f"[KnowledgeStore] builtin 内容未变化（hash={content_hash[:8]}），跳过重建")
+                return 0
+        except Exception:
+            pass
+
+        # 第四步：哈希不一致或不存在，重建 collection
+        print(f"[KnowledgeStore] builtin 内容已变化，重建 theorems collection（{len(all_chunks)} 条）")
+        try:
+            self._client.delete_collection("theorems")
+        except Exception:
+            pass
+        self._theorems = self._client.get_or_create_collection(
+            name="theorems", embedding_function=_EMBED_FN
+        )
+
+        for chunk in all_chunks:
+            self._theorems.add(
+                ids=[chunk["id"]],
+                documents=[chunk["content"]],
+                metadatas=[{
+                    "latex_formula": chunk.get("latex_formula", ""),
+                    "topic": chunk.get("topic", ""),
+                    "subtopic": chunk.get("subtopic", ""),
+                    "difficulty_min": int(chunk.get("difficulty_range", [1, 5])[0]),
+                    "difficulty_max": int(chunk.get("difficulty_range", [1, 5])[1]),
+                    "source": "builtin",
+                }],
+            )
+
+        # 写入哈希标记
+        self._theorems.add(
+            ids=["__builtin_hash__"],
+            documents=[content_hash],
+            metadatas=[{"source": "hash_marker", "topic": "__meta__",
+                        "difficulty_min": 0, "difficulty_max": 0}],
+        )
+        return len(all_chunks)
 
     #添加用户文档
     def add_user_document(self, doc_id: str, text: str, metadata: dict) -> None:

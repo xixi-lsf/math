@@ -25,6 +25,11 @@ export default function ProblemDisplay({ problem, onRequestSolution, solution, i
             题目
           </h2>
           <div className="flex items-center gap-1.5">
+            {problem.is_fallback && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-700">
+                📚 来自题库
+              </span>
+            )}
             {problem.drawing_path && (
               <span className={clsx(
                 'text-xs px-2 py-0.5 rounded-full font-medium',
@@ -128,6 +133,10 @@ interface Segment {
 function parseLatex(text: string): Segment[] {
   const segments: Segment[] = []
   let remaining = text
+
+  // Normalize \[...\] → $$...$$ and \(...\) → $...$
+  remaining = remaining.replace(/\\\[([\s\S]*?)\\\]/g, (_m, c) => `$$${c}$$`)
+  remaining = remaining.replace(/\\\(([\s\S]*?)\\\)/g, (_m, c) => `$${c}$`)
 
   while (remaining.length > 0) {
     // Display math: $$...$$

@@ -7,17 +7,29 @@ from __future__ import annotations
 import base64
 import io
 import numpy as np
+import matplotlib.font_manager as _fm
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as _fm
 
-# Use a CJK-capable font for Chinese labels in figures
-for _font_name in ["Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "Arial Unicode MS"]:
-    if any(f.name == _font_name for f in _fm.fontManager.ttflist):
-        plt.rcParams["font.family"] = _font_name
-        break
-plt.rcParams["axes.unicode_minus"] = False
+
+def _setup_chinese_font() -> bool:
+    """尝试设置中文字体，返回是否成功找到 CJK 字体。"""
+    candidates = [
+        "Microsoft YaHei", "SimHei", "SimSun",
+        "Noto Sans CJK SC", "Noto Sans SC",
+        "WenQuanYi Micro Hei", "Arial Unicode MS",
+        "PingFang SC", "Heiti SC",
+    ]
+    available = {f.name for f in _fm.fontManager.ttflist}
+    matched = [name for name in candidates if name in available]
+    plt.rcParams["font.sans-serif"] = matched or candidates
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams["axes.unicode_minus"] = False
+    return bool(matched)
+
+
+_CJK_AVAILABLE = _setup_chinese_font()
 import matplotlib.patches as mpatches
 from sympy import sympify, sqrt, cos, sin, pi, lambdify, symbols
 
@@ -63,14 +75,20 @@ def _setup_axes(params: ProblemParams) -> tuple[plt.Figure, plt.Axes]:
 """
 def _draw_points(ax: plt.Axes, points: list[Point]) -> None:
     for pt in points:
-        px, py = pt.to_float()
-        ax.plot(px, py, "ro", markersize=5, zorder=5)
-        ax.annotate(
-            f"$\\mathit{{{pt.name}}}$",
-            (px, py),
-            xytext=(px + pt.label_offset[0], py + pt.label_offset[1]),
-            fontsize=11,
-        )
+        try:
+            px, py = pt.to_float()
+            ax.plot(px, py, "ro", markersize=5, zorder=5)
+            label = pt.display_label or pt.name
+            if pt.show_coordinates:
+                label = f"{label}({pt.x}, {pt.y})"
+            ax.annotate(
+                label,
+                (px, py),
+                xytext=(px + pt.label_offset[0], py + pt.label_offset[1]),
+                fontsize=11,
+            )
+        except Exception:
+            pass
 
 """
 画线
@@ -78,27 +96,39 @@ def _draw_points(ax: plt.Axes, points: list[Point]) -> None:
 def _draw_lines(ax: plt.Axes, lines: list[LineParams], x_range: tuple) -> None:
     x_arr = np.linspace(x_range[0], x_range[1], 400)
     for line in lines:
-        if line.x1 and line.x2:
-            # Explicit segment
+        if line.x1 is not None and line.x2 is not None:
+            # Explicit segment (两点式)
             x1, y1 = float(sympify(line.x1)), float(sympify(line.y1))
             x2, y2 = float(sympify(line.x2)), float(sympify(line.y2))
-            ax.plot([x1, x2], [y1, y2], "b-", linewidth=1.5, label=f"${line.label}$")
+            ax.plot([x1, x2], [y1, y2], "b-", linewidth=1.5)
         elif line.x_fixed is not None:
             xv = float(sympify(line.x_fixed))
-            ax.axvline(xv, color="blue", linewidth=1.5, label=f"${line.label}$")
+            ax.axvline(xv, color="blue", linewidth=1.5)
         elif line.slope is not None:
             k = float(sympify(line.slope))
-            b = float(sympify(line.intercept or "0"))
+            # 点斜式：优先用 x1/y1 作为直线上的点，否则退回 intercept
+            if line.x1 is not None and line.y1 is not None:
+                px, py = float(sympify(line.x1)), float(sympify(line.y1))
+                b = py - k * px
+            else:
+                b = float(sympify(line.intercept or "0"))
             y_arr = k * x_arr + b
-            ax.plot(x_arr, y_arr, "b-", linewidth=1.5, label=f"${line.label}$")
+            ax.plot(x_arr, y_arr, "b-", linewidth=1.5)
 
 
-# ── Ellipse ───────────────────────────────────────────────────────────────────
+def _get_display_equation(params: ProblemParams, fallback: str) -> str:
+    return params.conic.display_equation_latex or fallback
+
 
 def draw_ellipse(params: ProblemParams) -> str:
     c = params.conic
-    a = float(sympify(c.a))
-    b = float(sympify(c.b))
+    a_unknown = c.a is None
+    b_unknown = c.b is None
+    a = float(sympify(c.a)) if c.a is not None else 2.0
+    b = float(sympify(c.b)) if c.b is not None else 1.0
+    if a_unknown or b_unknown:
+        if a <= b:
+            a = b + 1.0
 
     #画坐标轴，创建图形
     fig, ax = _setup_axes(params)
@@ -113,7 +143,20 @@ def draw_ellipse(params: ProblemParams) -> str:
     """
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    ax.set_title(f"椭圆 $\\frac{{x^2}}{{{_fmt(a**2)}}}+\\frac{{y^2}}{{{_fmt(b**2)}}}=1$", fontsize=12)
+    if _CJK_AVAILABLE:
+        suffix = "（示意）" if (a_unknown or b_unknown) else ""
+        equation = _get_display_equation(
+            params,
+            f"\\frac{{x^2}}{{{_fmt(a**2)}}}+\\frac{{y^2}}{{{_fmt(b**2)}}}=1",
+        )
+        ax.set_title(f"椭圆 ${equation}${suffix}", fontsize=12)
+    else:
+        suffix = " (sketch)" if (a_unknown or b_unknown) else ""
+        equation = _get_display_equation(
+            params,
+            f"x^2/{_fmt(a**2)}+y^2/{_fmt(b**2)}=1",
+        )
+        ax.set_title(f"Ellipse ${equation}${suffix}", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -121,8 +164,10 @@ def draw_ellipse(params: ProblemParams) -> str:
 #双曲线（也画出了渐近线）
 def draw_hyperbola(params: ProblemParams) -> str:
     c = params.conic
-    a = float(sympify(c.a))
-    b = float(sympify(c.b))
+    a_unknown = c.a is None
+    b_unknown = c.b is None
+    a = float(sympify(c.a)) if c.a is not None else 2.0
+    b = float(sympify(c.b)) if c.b is not None else 1.0
 
     fig, ax = _setup_axes(params)
     t = np.linspace(-2.5, 2.5, 800)
@@ -146,7 +191,20 @@ def draw_hyperbola(params: ProblemParams) -> str:
 
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    ax.set_title(f"双曲线 $\\frac{{x^2}}{{{_fmt(a**2)}}}-\\frac{{y^2}}{{{_fmt(b**2)}}}=1$", fontsize=12)
+    if _CJK_AVAILABLE:
+        suffix = "（示意）" if (a_unknown or b_unknown) else ""
+        equation = _get_display_equation(
+            params,
+            f"\\frac{{x^2}}{{{_fmt(a**2)}}}-\\frac{{y^2}}{{{_fmt(b**2)}}}=1",
+        )
+        ax.set_title(f"双曲线 ${equation}${suffix}", fontsize=12)
+    else:
+        suffix = " (sketch)" if (a_unknown or b_unknown) else ""
+        equation = _get_display_equation(
+            params,
+            f"x^2/{_fmt(a**2)}-y^2/{_fmt(b**2)}=1",
+        )
+        ax.set_title(f"Hyperbola ${equation}${suffix}", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -154,7 +212,8 @@ def draw_hyperbola(params: ProblemParams) -> str:
 
 def draw_parabola(params: ProblemParams) -> str:
     c = params.conic
-    p = float(sympify(c.p))
+    p_unknown = c.p is None
+    p = float(sympify(c.p)) if c.p is not None else 1.0
     direction = c.parabola_direction or "right"
 
     fig, ax = _setup_axes(params)
@@ -190,7 +249,14 @@ def draw_parabola(params: ProblemParams) -> str:
 
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    ax.set_title(f"抛物线 $y^2={_fmt(2*p)}x$", fontsize=12)
+    if _CJK_AVAILABLE:
+        suffix = "（示意）" if p_unknown else ""
+        equation = _get_display_equation(params, f"y^2={_fmt(2*p)}x")
+        ax.set_title(f"抛物线 ${equation}${suffix}", fontsize=12)
+    else:
+        suffix = " (sketch)" if p_unknown else ""
+        equation = _get_display_equation(params, f"y^2={_fmt(2*p)}x")
+        ax.set_title(f"Parabola ${equation}${suffix}", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -198,8 +264,10 @@ def draw_parabola(params: ProblemParams) -> str:
 
 def draw_polar_conic(params: ProblemParams) -> str:
     c = params.conic
-    e = float(sympify(c.eccentricity))
-    d = float(sympify(c.focal_distance or "1"))
+    e_unknown = c.eccentricity is None
+    d_unknown = c.focal_distance is None
+    e = float(sympify(c.eccentricity)) if c.eccentricity is not None else 0.5
+    d = float(sympify(c.focal_distance)) if c.focal_distance is not None else 2.0
 
     fig, ax = _setup_axes(params)
     theta = np.linspace(0, 2 * np.pi, 2000)
@@ -216,7 +284,14 @@ def draw_polar_conic(params: ProblemParams) -> str:
     )
     ax.plot(x[mask], y[mask], "k-", linewidth=2)
     _draw_points(ax, params.key_points)
-    ax.set_title(f"极坐标圆锥曲线 $e={e:.3g}$", fontsize=12)
+    if _CJK_AVAILABLE:
+        suffix = "（示意）" if (e_unknown or d_unknown) else ""
+        equation = _get_display_equation(params, f"e={e:.3g}")
+        ax.set_title(f"极坐标圆锥曲线 ${equation}${suffix}", fontsize=12)
+    else:
+        suffix = " (sketch)" if (e_unknown or d_unknown) else ""
+        equation = _get_display_equation(params, f"e={e:.3g}")
+        ax.set_title(f"Polar Conic ${equation}${suffix}", fontsize=12)
     return _fig_to_b64(fig)
 
 

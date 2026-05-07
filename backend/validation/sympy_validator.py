@@ -10,7 +10,7 @@ from sympy import (
 )
 from models.problem import ProblemParams, ConicParams, ValidationResult
 
-
+#安全判断一个 sympy 表达式是否大于 0
 def _is_positive(expr) -> bool:
     """Safely check if a sympy expression is positive."""
     try:
@@ -18,7 +18,7 @@ def _is_positive(expr) -> bool:
     except Exception:
         return True  # can't determine, let it through
 
-
+#判断 a > b
 def _gt(a, b) -> bool:
     """Safely check a > b for sympy expressions."""
     try:
@@ -26,7 +26,8 @@ def _gt(a, b) -> bool:
     except Exception:
         return True  # can't determine, let it through
 
-
+#根据 curve_type 分发到特定的验证函数
+#对于 polar_conic 直接返回合法（因为极坐标圆锥曲线验证较复杂，目前跳过）
 def validate_params(params: ProblemParams) -> ValidationResult:
     """Dispatch to the appropriate validator based on curve_type."""
     curve_type = params.conic.curve_type
@@ -47,13 +48,11 @@ def validate_params(params: ProblemParams) -> ValidationResult:
 
 
 # ── Ellipse ───────────────────────────────────────────────────────────────────
-
+#检查：a > b且a,b>0
 def _validate_ellipse(params: ProblemParams) -> ValidationResult:
     c = params.conic
     if c.a is None or c.b is None:
-        return ValidationResult(is_valid=False, error_type="missing_params",
-                                error_detail="椭圆缺少 a 或 b 参数",
-                                suggested_fix="请重新生成，确保提取 a 和 b")
+        return ValidationResult(is_valid=True)  # a 或 b 是待求量，跳过验证
     try:
         a = sympify(c.a)
         b = sympify(c.b)
@@ -91,7 +90,7 @@ def _validate_ellipse(params: ProblemParams) -> ValidationResult:
 
     return ValidationResult(is_valid=True)
 
-
+#直线交点验证
 def _check_line_ellipse_intersection(a, b, line) -> Optional[ValidationResult]:
     x, y = symbols("x y")
     ellipse_eq = x**2 / a**2 + y**2 / b**2 - 1
@@ -128,13 +127,11 @@ def _check_line_ellipse_intersection(a, b, line) -> Optional[ValidationResult]:
 
 
 # ── Hyperbola ─────────────────────────────────────────────────────────────────
-
+#验证a > 0, b > 0，满足 c² = a² + b²
 def _validate_hyperbola(params: ProblemParams) -> ValidationResult:
     c = params.conic
     if c.a is None or c.b is None:
-        return ValidationResult(is_valid=False, error_type="missing_params",
-                                error_detail="双曲线缺少 a 或 b 参数",
-                                suggested_fix="请重新生成，确保提取 a 和 b")
+        return ValidationResult(is_valid=True)  # a 或 b 是待求量，跳过验证
     try:
         a = sympify(c.a)
         b = sympify(c.b)
@@ -162,13 +159,11 @@ def _validate_hyperbola(params: ProblemParams) -> ValidationResult:
 
 
 # ── Parabola ──────────────────────────────────────────────────────────────────
-
+#p>0
 def _validate_parabola(params: ProblemParams) -> ValidationResult:
     c = params.conic
     if c.p is None:
-        return ValidationResult(is_valid=False, error_type="missing_params",
-                                error_detail="抛物线缺少 p 参数",
-                                suggested_fix="请重新生成，确保提取 p")
+        return ValidationResult(is_valid=True)  # p 是题目待求量，跳过验证
     try:
         p = sympify(c.p)
     except Exception as e:

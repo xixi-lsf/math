@@ -11,9 +11,9 @@ from langgraph.graph import StateGraph, END
 from agent.state import AgentState
 from agent.nodes.knowledge_retrieval import knowledge_retrieval_node
 from agent.nodes.problem_generation import problem_generation_node, param_extraction_node
-from agent.nodes.validation import validation_node
+from agent.nodes.solve_and_validate import solve_and_validate_node
+from agent.nodes.fallback import fallback_node
 from agent.nodes.drawing import drawing_node
-from agent.nodes.solution_generation import solution_generation_node
 from models.problem import Problem
 
 #题目生成/绘图 重试次数
@@ -22,13 +22,15 @@ _MAX_DRAWING_RETRIES = 3
 
 
 # ── Conditional edges（条件边函数）：决策逻辑 ─────────────────────────────────────────────────────────
-#决定验证失败后是重新生成题目，还是进入绘图阶段
-def should_retry_generation(state: AgentState) -> Literal["retry", "draw"]:
+#决定求解验证失败后是重新生成题目，进入保底，还是进入绘图阶段
+def should_retry_generation(state: AgentState) -> Literal["problem_generation", "fallback", "drawing"]:
     result = state.get("validation_result")
-    retry = state.get("retry_count", 0)
-    if result and not result.is_valid and retry < _MAX_RETRIES:
-        return "retry"
-    return "draw"
+    retry = state.get("generation_retry", 0)
+    if result and not result.is_valid:
+        if retry < _MAX_RETRIES:
+            return "problem_generation"
+        return "fallback"
+    return "drawing"
 
 #决定绘图失败后是重试绘图，还是结束
 def should_retry_drawing(state: AgentState) -> Literal["retry_draw", "done"]:
@@ -49,8 +51,10 @@ def finalize_node(state: AgentState) -> dict:
         latex_problem=state.get("latex_problem", ""),
         image_base64=state.get("image_base64") or "",
         reasoning_trace=state.get("reasoning_trace", []),
+        solution=state.get("solution"),
         solution_latex=state.get("solution_latex"),
         generation_config=state.get("llm_config", {}),
+        is_fallback=bool(state.get("is_fallback", False)),
     )
     return {"final_problem": problem}
 
@@ -64,7 +68,8 @@ def build_graph() -> StateGraph:
     g.add_node("knowledge_retrieval", knowledge_retrieval_node)
     g.add_node("problem_generation", problem_generation_node)
     g.add_node("param_extraction", param_extraction_node)
-    g.add_node("validation", validation_node)
+    g.add_node("solve_and_validate", solve_and_validate_node)
+    g.add_node("fallback", fallback_node)
     g.add_node("drawing", drawing_node)
     g.add_node("finalize", finalize_node)
 
@@ -73,14 +78,19 @@ def build_graph() -> StateGraph:
     #加线性执行边（知识检索，问题生成，参数提取）
     g.add_edge("knowledge_retrieval", "problem_generation")
     g.add_edge("problem_generation", "param_extraction")
-    g.add_edge("param_extraction", "validation")
+    g.add_edge("param_extraction", "solve_and_validate")
 
-    #加条件边，三个参数为源节点、条件函数、映射字典
     g.add_conditional_edges(
-        "validation",
+        "solve_and_validate",
         should_retry_generation,
-        {"retry": "problem_generation", "draw": "drawing"},
+        {
+            "problem_generation": "problem_generation",
+            "drawing": "drawing",
+            "fallback": "fallback",
+        },
     )
+
+    g.add_edge("fallback", "finalize")
 
     g.add_conditional_edges(
         "drawing",

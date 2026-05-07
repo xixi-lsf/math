@@ -58,23 +58,31 @@ export function useSSEStream(): UseSSEStreamResult {
           const lines = buffer.split('\n')
           buffer = lines.pop() ?? ''
 
+          let dataAccum = ''
           for (const line of lines) {
-            if (!line.startsWith('data: ')) continue
-            const raw = line.slice(6).trim()
-            if (!raw) continue
-
-            try {
-              const event = JSON.parse(raw)
-              if (event.type === 'reasoning_step') {
-                setSteps(prev => [...prev, event as ReasoningStep])
-              } else if (event.type === 'problem_ready') {
-                setProblem(event as ProblemResult)
-                setIsStreaming(false)
-              } else if (event.type === 'error') {
-                setError(event.message ?? '未知错误')
-                setIsStreaming(false)
+            if (line.startsWith('data: ')) {
+              dataAccum = line.slice(6)
+            } else if (line === '') {
+              // 空行代表一个 SSE 事件结束
+              if (dataAccum) {
+                try {
+                  const event = JSON.parse(dataAccum.trim())
+                  if (event.type === 'reasoning_step') {
+                    setSteps(prev => [...prev, event as ReasoningStep])
+                  } else if (event.type === 'problem_ready') {
+                    setProblem(event as ProblemResult)
+                    setIsStreaming(false)
+                  } else if (event.type === 'error') {
+                    setError(event.message ?? '未知错误')
+                    setIsStreaming(false)
+                  }
+                } catch {}
+                dataAccum = ''
               }
-            } catch {}
+            } else if (dataAccum) {
+              // 同一个 SSE 事件的续行，拼接起来
+              dataAccum += line
+            }
           }
         }
       } catch (e: unknown) {

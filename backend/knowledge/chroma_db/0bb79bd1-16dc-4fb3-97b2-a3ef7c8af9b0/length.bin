@@ -1,0 +1,1 @@
+{"latex_formula":"S=\\frac{1}{2}\\int_\\alpha^\\beta r^2\\,d\\theta","difficulty_max":5,"subtopic":"area","chroma:document":"极坐标面积公式：极坐标曲线 r = f(θ) 在 α ≤ θ ≤ β 范围内围成的面积 S = (1/2)∫[α,β] r²dθ。两曲线 r₁ = f(θ)，r₂ = g(θ) 之间的面积 S = (1/2)∫[α,β] (r₁²-r₂²)dθ。","source":"builtin","topic":"polar","difficulty_min":4

@@ -56,21 +56,35 @@ class _KeywordEmbeddingFunction:
 
 #嵌入函数
 def _make_embed_fn():
-    # Try sentence-transformers (already downloaded)
+    # Try sentence-transformers only if model snapshot is fully downloaded (offline check)
     try:
         import sentence_transformers  # noqa: F401
-        # 查找缓存目录下是否存在以 "models--sentence-transformers" 开头的文件夹
         cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
-        model_dirs = list(cache_dir.glob("models--sentence-transformers*"))
-        # 如果存在，说明模型已下载
-        if model_dirs:
-            # 返回 ChromaDB 内置的 SentenceTransformer 嵌入函数
+        model_name = "paraphrase-multilingual-MiniLM-L12-v2"
+        safe_name = "models--sentence-transformers--" + model_name
+        snapshot_dir = cache_dir / safe_name / "snapshots"
+        # Check that at least one snapshot folder contains pytorch_model.bin or model.safetensors
+        model_ready = False
+        if snapshot_dir.exists():
+            for snap in snapshot_dir.iterdir():
+                if (snap / "pytorch_model.bin").exists() or (snap / "model.safetensors").exists():
+                    model_ready = True
+                    break
+        if model_ready:
+            os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+            os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
+            # Find the actual snapshot path to load offline
+            local_path = None
+            for snap in snapshot_dir.iterdir():
+                if (snap / "pytorch_model.bin").exists() or (snap / "model.safetensors").exists():
+                    local_path = str(snap)
+                    break
             return embedding_functions.SentenceTransformerEmbeddingFunction(
-                model_name="paraphrase-multilingual-MiniLM-L12-v2"
+                model_name=local_path or model_name
             )
     except Exception:
         pass
-    # Fallback: keyword-based
+    # Fallback: keyword-based (no network needed)
     return _KeywordEmbeddingFunction()
 
 
@@ -93,6 +107,9 @@ class KnowledgeStore:
         self._user_docs = self._client.get_or_create_collection(
             name="user_documents", embedding_function=_EMBED_FN
         )
+        self._examples = self._client.get_or_create_collection(
+            name="example_problems", embedding_function=_EMBED_FN
+        )
 
     # ── Ingestion ─────────────────────────────────────────────────────────────
 
@@ -103,7 +120,7 @@ class KnowledgeStore:
         # 第一步：收集所有 builtin chunks
         all_chunks: list[dict] = []
         for topic_dir in sorted(_BUILTIN_DIR.iterdir()):
-            if not topic_dir.is_dir():
+            if not topic_dir.is_dir() or topic_dir.name == "problems":
                 continue
             for json_file in sorted(topic_dir.glob("*.json")):
                 chunks: list[dict] = json.loads(json_file.read_text(encoding="utf-8"))
@@ -155,6 +172,63 @@ class KnowledgeStore:
                         "difficulty_min": 0, "difficulty_max": 0}],
         )
         return len(all_chunks)
+
+    def load_example_problems(self) -> int:
+        """增量加载例题库。内容无变化时直接跳过，有变化时重建 collection。"""
+        problem_dir = _BUILTIN_DIR / "problems"
+        all_problems: list[dict] = []
+        for json_file in sorted(problem_dir.glob("*.json")):
+            problems: list[dict] = json.loads(json_file.read_text(encoding="utf-8"))
+            all_problems.extend(problems)
+
+        content_hash = hashlib.md5(
+            json.dumps(all_problems, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+
+        try:
+            existing = self._examples.get(ids=["__problems_hash__"])
+            if existing["ids"] and existing["documents"][0] == content_hash:
+                print(f"[KnowledgeStore] 例题库内容未变化（hash={content_hash[:8]}），跳过重建")
+                return 0
+        except Exception:
+            pass
+
+        print(f"[KnowledgeStore] 例题库内容已变化，重建 example_problems collection（{len(all_problems)} 条）")
+        try:
+            self._client.delete_collection("example_problems")
+        except Exception:
+            pass
+        self._examples = self._client.get_or_create_collection(
+            name="example_problems", embedding_function=_EMBED_FN
+        )
+
+        for problem in all_problems:
+            self._examples.add(
+                ids=[problem["id"]],
+                documents=[problem.get("problem", "")],
+                metadatas=[{
+                    "topic": problem.get("topic", ""),
+                    "difficulty": int(problem.get("difficulty", 1)),
+                    "subtopics": ",".join(problem.get("subtopics", [])),
+                    "has_solution": bool(problem.get("solution")),
+                    "solution": problem.get("solution", ""),
+                    "source": problem.get("source", "builtin_problem"),
+                }],
+            )
+
+        self._examples.add(
+            ids=["__problems_hash__"],
+            documents=[content_hash],
+            metadatas=[{
+                "topic": "__meta__",
+                "difficulty": 0,
+                "subtopics": "",
+                "has_solution": False,
+                "solution": "",
+                "source": "hash_marker",
+            }],
+        )
+        return len(all_problems)
 
     #添加用户文档
     def add_user_document(self, doc_id: str, text: str, metadata: dict) -> None:
@@ -243,6 +317,80 @@ class KnowledgeStore:
                 source="user_upload",
             ))
         return chunks
+
+    def retrieve_examples(self, topic: str, difficulty: int, n: int = 2) -> list[str]:
+        """
+        检索相似例题，返回格式化的字符串列表（题干+解答）
+        难度匹配：difficulty-1 到 difficulty+1 范围内的题都算
+        """
+        try:
+            count = self._examples.count()
+            if count == 0:
+                return []
+            results = self._examples.query(
+                query_texts=[topic],
+                n_results=min(n, count),
+                where={
+                    "$and": [
+                        {"topic": {"$eq": topic}},
+                        {"difficulty": {"$gte": difficulty - 1}},
+                        {"difficulty": {"$lte": difficulty + 1}},
+                    ]
+                }
+            )
+            formatted = []
+            for doc, meta in zip(
+                results["documents"][0],
+                results["metadatas"][0]
+            ):
+                if meta.get("source") == "hash_marker":
+                    continue
+                entry = f"【例题】{doc}"
+                solution = meta.get("solution", "")
+                if solution:
+                    entry += f"\n【解答】{solution}"
+                formatted.append(entry)
+            return formatted
+        except Exception:
+            return []
+
+    def get_fallback_problem(self, topic: str, difficulty: int) -> dict | None:
+        """
+        从题库中取一道最匹配的题目作为保底。
+        返回完整的题目dict（含problem和solution），找不到返回None。
+        """
+        try:
+            count = self._examples.count()
+            if count == 0:
+                return None
+
+            # 难度范围逐步放宽：先精确匹配，再放宽±1，再放宽±2
+            for delta in [0, 1, 2]:
+                results = self._examples.query(
+                    query_texts=[topic],
+                    n_results=1,
+                    where={
+                        "$and": [
+                            {"topic": {"$eq": topic}},
+                            {"difficulty": {"$gte": difficulty - delta}},
+                            {"difficulty": {"$lte": difficulty + delta}},
+                        ]
+                    } if delta < 2 else {"topic": {"$eq": topic}},
+                )
+                if results and results["ids"][0]:
+                    doc = results["documents"][0][0]
+                    meta = results["metadatas"][0][0]
+                    if meta.get("source") == "hash_marker":
+                        continue
+                    return {
+                        "problem": doc,
+                        "solution": meta.get("solution", ""),
+                        "source": meta.get("source", "题库"),
+                        "is_fallback": True,
+                    }
+            return None
+        except Exception:
+            return None
 
     def list_user_docs(self) -> list[dict]:
         """List all user-uploaded document metadata."""

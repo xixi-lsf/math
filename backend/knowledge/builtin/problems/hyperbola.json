@@ -1,0 +1,75 @@
+[
+  {
+    "id": "hyperbola_eccentricity_001",
+    "topic": "hyperbola",
+    "difficulty": 1,
+    "subtopics": ["standard_equation", "eccentricity"],
+    "source": "2025高考北京卷",
+    "problem": "双曲线 $x^2 - 4y^2 = 4$ 的离心率是多少？",
+    "solution": "首先将双曲线方程化为标准形式：\n$$\nx^2 - 4y^2 = 4 \\implies \\frac{x^2}{4} - \\frac{y^2}{1} = 1\n$$\n由此可得：\n$$\na^2 = 4,\\ b^2 = 1\n$$\n根据双曲线的基本关系 $c^2 = a^2 + b^2$，计算：\n$$\nc^2 = 4 + 1 = 5 \\implies c = \\sqrt{5}\n$$\n离心率 $e = \\dfrac{c}{a}$，其中 $a = \\sqrt{4} = 2$，因此：\n$$\ne = \\frac{\\sqrt{5}}{2}\n$$\n所以该双曲线的离心率为 $\\dfrac{\\sqrt{5}}{2}$。"
+   },
+  {
+    "id": "hyperbola_parabola_eccentricity_001",
+    "topic": "hyperbola",
+    "difficulty": 4,
+    "subtopics": ["definition", "eccentricity", "intersection"],
+    "source": "2025天津高考真题",
+    "problem": "双曲线 $\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1(a>0,b>0)$ 的左、右焦点分别为 $F_1,F_2$，以右焦点 $F_2$ 为焦点的抛物线 $y^2=2px(p>0)$ 与双曲线在第一象限的交点为 $P$，若 $|PF_1|+|PF_2|=3|F_1F_2|$，则双曲线的离心率 $e=$？",
+    "solution": "（1）利用双曲线定义与已知条件：\n根据双曲线定义：$|PF_1| - |PF_2| = 2a$，\n已知 $|PF_1| + |PF_2| = 3|F_1F_2| = 6c$，\n联立两式解得：\n$$\n|PF_1| = 3c + a,\\quad |PF_2| = 3c - a\n$$\n\n（2）利用抛物线定义求点 $P$ 的横坐标：\n抛物线以 $F_2(c,0)$ 为焦点，故 $\\dfrac{p}{2}=c$，即 $p=2c$，抛物线方程为 $y^2=4cx$，准线为 $x=-c$。\n\n由抛物线定义：点 $P$ 到焦点 $F_2$ 的距离等于到准线的距离，即 $|PF_2|=x_0 + c$，其中 $P(x_0,y_0)$。\n\n因此：\n$$\nx_0 + c = 3c - a \\implies x_0 = 2c - a\n$$\n\n（3）在 $Rt\\triangle F_1NP$ 中应用勾股定理：\n$F_1(-c,0)$，准线与 $x$ 轴交点为 $N(-c,0)$，$PN \\perp$ 准线，故 $N(-c,y_0)$，\n在 $Rt\\triangle F_1NP$ 中：\n$$\n|F_1N|^2 + |NP|^2 = |PF_1|^2\n$$\n其中 $|F_1N|=|y_0|$，$|NP|=x_0 + c = |PF_2|=3c-a$，$|PF_1|=3c+a$，代入得：\n$$\ny_0^2 + (2c-a + c)^2 = (3c+a)^2\n$$\n$$\ny_0^2 + (3c-a)^2 = (3c+a)^2\n$$\n展开化简：\n$$\ny_0^2 = (3c+a)^2 - (3c-a)^2 = 12ac\n$$\n\n（4）结合抛物线方程求解离心率：\n点 $P(x_0,y_0)$ 在抛物线 $y^2=4cx$ 上，故 $y_0^2=4cx_0$，\n代入 $x_0=2c-a$ 和 $y_0^2=12ac$：\n$$\n12ac = 4c(2c - a)\n$$\n两边除以 $4c$（$c>0$）：\n$$\n3a = 2c - a \\implies 4a = 2c \\implies c = 2a\n$$\n\n因此双曲线的离心率：\n$$\ne = \\frac{c}{a} = 2\n$$"
+  },
+  {
+    "id": "hyperbola_eccentricity_focal_chord_001",
+    "topic": "hyperbola",
+    "difficulty": 3,
+    "subtopics": ["focal_chord", "definition", "eccentricity"],
+    "source": "2024新课标一卷高考真题",
+    "problem": "设双曲线 $C:\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1(a>0,b>0)$ 的左右焦点分别为 $F_1,F_2$，过 $F_2$ 作平行于 $y$ 轴的直线交 $C$ 于 $A,B$ 两点，若 $|F_1A|=13,|AB|=10$，则 $C$ 的离心率为多少？",
+    "solution": "（1）利用双曲线定义求 $a$：\n过 $F_2$ 作平行于 $y$ 轴的直线交双曲线于 $A,B$ 两点，则 $|AF_2|=\\dfrac{1}{2}|AB|=5$。\n\n根据双曲线定义：\n$$\n|F_1A| - |AF_2| = 2a\n$$\n代入已知 $|F_1A|=13,|AF_2|=5$，得：\n$$\n13 - 5 = 2a \\implies 2a=8 \\implies a=4\n$$\n\n（2）利用通径公式求 $b^2$：\n过焦点且垂直于实轴的弦（通径）长为 $\\dfrac{2b^2}{a}$，故 $|AF_2|=\\dfrac{b^2}{a}$，即：\n$$\n\\dfrac{b^2}{a}=5 \\implies b^2=5a=5 \\times 4=20\n$$\n\n（3）计算 $c$ 与离心率 $e$：\n由双曲线关系 $c^2=a^2+b^2$，得：\n$$\nc^2=4^2+20=16+20=36 \\implies c=6\n$$\n\n因此离心率：\n$$\ne=\\dfrac{c}{a}=\\dfrac{6}{4}=\\dfrac{3}{2}\n$$"
+  },
+  {
+    "id": "hyperbola_midpoint_001",
+    "topic": "hyperbola",
+    "difficulty": 3,
+    "subtopics": ["locus_equation", "parametric_substitution"],
+    "source": "2024新课标二卷高考真题",
+    "problem": "已知曲线 $C: x^2 + y^2 = 16 \\ (y > 0)$，从 $C$ 上任意一点 $P$ 向 $x$ 轴作垂线段 $PP'$，$P'$ 为垂足，则线段 $PP'$ 的中点 $M$ 的轨迹方程为（）\nA. $\\dfrac{x^2}{16} + \\dfrac{y^2}{4} = 1 \\ (y > 0)$\nB. $\\dfrac{x^2}{16} + \\dfrac{y^2}{8} = 1 \\ (y > 0)$\nC. $\\dfrac{y^2}{16} + \\dfrac{x^2}{4} = 1 \\ (y > 0)$\nD. $\\dfrac{y^2}{16} + \\dfrac{x^2}{8} = 1 \\ (y > 0)$",
+    "solution": "设中点 $M(x_0, y_0)$，则垂足 $P'(x_0, 0)$，点 $P$ 坐标为 $(x_0, 2y_0)$。\n\n因为点 $P$ 在曲线 $C: x^2 + y^2 = 16 \\ (y > 0)$ 上，代入得：\n$$\nx_0^2 + (2y_0)^2 = 16 \\quad (y_0 > 0)\n$$\n\n整理方程：\n$$\nx^2 + 4y^2 = 16 \\implies \\frac{x^2}{16} + \\frac{y^2}{4} = 1 \\quad (y > 0)\n$$\n\n故 $M$ 的轨迹方程为选项 A。"
+  },
+  {
+    "id": "hyperbola_sequence_proof_001",
+    "topic": "hyperbola",
+    "difficulty": 5,
+    "subtopics": ["hyperbola", "recursive_point_construction", "geometric_sequence_proof"],
+    "source": "高考模拟题",
+    "problem": "已知双曲线 $C: x^2 - y^2 = m\\ (m > 0)$，点 $P_1(5,4)$ 在 $C$ 上，$k$ 为常数，$0 < k < 1$，按如下方式依次构造点 $P_n\\ (n=2,3,\\dots)$：过 $P_{n-1}$ 作斜率为 $k$ 的直线与 $C$ 的左支交于点 $a_{n-1}$，令 $P_n$ 为 $a_{n-1}$ 关于 $y$ 轴的对称点，记 $P_n$ 的坐标为 $(x_n, y_n)$。\n\n（1）若 $k = \\dfrac{1}{2}$，求 $x_2, y_2$；\n\n（2）证明：数列 $\\{x_n - y_n\\}$ 是公比为 $\\dfrac{1+k}{1-k}$ 的等比数列。",
+    "solution": "（1）求 $x_2, y_2$：\n将点 $P_1(5,4)$ 代入双曲线方程 $x^2 - y^2 = m$，得：\n$$\nm = 5^2 - 4^2 = 25 - 16 = 9\n$$\n因此双曲线方程为 $x^2 - y^2 = 9$。\n\n过 $P_1(5,4)$ 且斜率为 $k = \\dfrac{1}{2}$ 的直线方程为：\n$$\ny - 4 = \\dfrac{1}{2}(x - 5)\n$$\n联立双曲线方程，解得直线与双曲线左支的交点为 $a_1(-3,0)$。\n\n$P_2$ 为 $a_1(-3,0)$ 关于 $y$ 轴的对称点，故 $P_2(3,0)$，即：\n$$\nx_2 = 3,\\ y_2 = 0\n$$\n\n（2）证明数列 $\\{x_n - y_n\\}$ 是公比为 $\\dfrac{1+k}{1-k}$ 的等比数列：\n由题意，过 $P_n(x_n, y_n)$ 和 $a_n(-x_{n+1}, y_{n+1})$ 的直线斜率为 $k$，故：\n$$\nk = \\dfrac{y_n - y_{n+1}}{x_n + x_{n+1}}\n$$\n\n整理得：\n$$\n1 + k = \\dfrac{x_n + x_{n+1} + y_n - y_{n+1}}{x_n + x_{n+1}},\\quad 1 - k = \\dfrac{x_n + x_{n+1} - y_n + y_{n+1}}{x_n + x_{n+1}}\n$$\n\n两式相除：\n$$\n\\dfrac{1+k}{1-k} = \\dfrac{x_n + x_{n+1} + y_n - y_{n+1}}{x_n + x_{n+1} - y_n + y_{n+1}}\n$$\n\n两边同时乘以 $\\dfrac{x_n - y_n}{x_{n+1} - y_{n+1}}$：\n$$\n\\dfrac{1+k}{1-k} \\cdot \\dfrac{x_n - y_n}{x_{n+1} - y_{n+1}} = \\dfrac{(x_n + x_{n+1} + y_n - y_{n+1})(x_n - y_n)}{(x_n + x_{n+1} - y_n + y_{n+1})(x_{n+1} - y_{n+1})}\n$$\n\n利用 $P_n, P_{n+1}$ 在双曲线上，即 $x_n^2 - y_n^2 = 9$ 和 $x_{n+1}^2 - y_{n+1}^2 = 9$，可得：\n$$\n(x_n + y_n)(x_n - y_n) = 9,\\quad (x_{n+1} + y_{n+1})(x_{n+1} - y_{n+1}) = 9\n$$\n\n代入化简：\n$$\n\\dfrac{1+k}{1-k} \\cdot \\dfrac{x_n - y_n}{x_{n+1} - y_{n+1}} = 1\n$$\n\n因此：\n$$\n\\dfrac{x_{n+1} - y_{n+1}}{x_n - y_n} = \\dfrac{1+k}{1-k}\n$$\n\n故数列 $\\{x_n - y_n\\}$ 是以 $\\dfrac{1+k}{1-k}$ 为公比的等比数列。"
+  },
+  {
+    "id": "hyperbola_ellipse_transformation_slope_product_001",
+    "topic": "hyperbola",
+    "difficulty": 4,
+    "subtopics": ["双曲线与椭圆的焦点顶点关系", "点关于原点对称", "斜率之积定值问题"],
+    "source": "高考复习题",
+    "problem": "已知双曲线 $\\dfrac{x^2}{6} - \\dfrac{y^2}{2} = 1$。\n\n(1) 求以双曲线的顶点为焦点，焦点为顶点的椭圆 $E$ 的方程；\n\n(2) 点 $P$ 在椭圆 $E$ 上，点 $C(2,1)$ 关于坐标原点的对称点为 $D$，直线 $CP$ 和 $DP$ 的斜率都存在且不为 $0$，试问直线 $CP$ 和 $DP$ 的斜率之积是否为定值？若是，求此定值；若不是，请说明理由。",
+    "solution": "(1) 求椭圆 $E$ 的方程：\n设椭圆 $E$ 的方程为 $\\dfrac{x^2}{a^2} + \\dfrac{y^2}{b^2} = 1$（$a > b > 0$）。\n双曲线 $\\dfrac{x^2}{6} - \\dfrac{y^2}{2} = 1$ 的顶点为 $(\\pm\\sqrt{6},0)$，焦点为 $(\\pm2\\sqrt{2},0)$。\n由题意，椭圆以双曲线顶点为焦点、焦点为顶点，故：\n$$\\begin{cases} a^2 = 6 + 2 = 8 \\\\ c^2 = 6 \\end{cases}$$\n则 $b^2 = a^2 - c^2 = 8 - 6 = 2$。\n因此，椭圆 $E$ 的方程为：\n$$\\dfrac{x^2}{8} + \\dfrac{y^2}{2} = 1$$\n\n(2) 判断斜率之积是否为定值：\n点 $C(2,1)$ 关于原点的对称点为 $D(-2,-1)$。\n设点 $P(x,y)$ 在椭圆 $E$ 上，则：\n$$k_{CP} = \\dfrac{y-1}{x-2}, \\quad k_{DP} = \\dfrac{y+1}{x+2}$$\n两斜率之积为：\n$$k_{CP} \\cdot k_{DP} = \\dfrac{y-1}{x-2} \\cdot \\dfrac{y+1}{x+2} = \\dfrac{y^2 - 1}{x^2 - 4}$$\n由点 $P$ 在椭圆上，得 $x^2 = 8 - 4y^2$，代入上式：\n$$k_{CP} \\cdot k_{DP} = \\dfrac{y^2 - 1}{(8 - 4y^2) - 4} = \\dfrac{y^2 - 1}{4(1 - y^2)} = -\\dfrac{1}{4}$$\n因此，直线 $CP$ 和 $DP$ 的斜率之积为定值 $-\\dfrac{1}{4}$。"
+},
+  {
+    "id": "hyperbola_intersection_locus_parameter_range_001",
+    "topic": "hyperbola",
+    "difficulty": 5,
+    "subtopics": ["双曲线与椭圆的轨迹方程", "直线与椭圆相交", "参数取值范围问题"],
+    "source": "高考复习题",
+    "problem": "已知双曲线 $C: \\dfrac{x^2}{4} - y^2 = 1$ 的左右两个顶点是 $A_1, A_2$，曲线 $C$ 上的动点 $P, Q$ 关于 $x$ 轴对称，直线 $A_1P$ 与 $A_2Q$ 交于点 $M$。\n\n(1) 求动点 $M$ 的轨迹 $D$ 的方程；\n\n(2) 点 $E(0,2)$，轨迹 $D$ 上的点 $A,B$ 满足 $\\overrightarrow{EA} = \\lambda \\overrightarrow{EB}$，求实数 $\\lambda$ 的取值范围。",
+    "solution": "(1) 求动点 $M$ 的轨迹 $D$ 的方程：\n双曲线 $C: \\dfrac{x^2}{4} - y^2 = 1$ 的顶点为 $A_1(-2,0), A_2(2,0)$。\n设 $P\\left(t, \\dfrac{\\sqrt{t^2-4}}{2}\\right)$，则 $Q\\left(t, -\\dfrac{\\sqrt{t^2-4}}{2}\\right)$。\n直线 $A_1P$ 的方程：$y = \\dfrac{\\sqrt{t^2-4}}{2(t+2)}(x+2)$，\n直线 $A_2Q$ 的方程：$y = -\\dfrac{\\sqrt{t^2-4}}{2(t-2)}(x-2)$。\n两式相乘消去参数 $t$：\n$$y^2 = -\\dfrac{1}{4}(x^2-4)$$\n化简得轨迹 $D$ 的方程：\n$$\\dfrac{x^2}{4} + y^2 = 1$$\n\n(2) 求实数 $\\lambda$ 的取值范围：\n当直线 $AB$ 斜率不存在时，$A,B$ 关于 $y$ 轴对称，可得 $\\lambda = \\dfrac{1}{3}$ 或 $\\lambda = 3$。\n当直线 $AB$ 斜率存在时，设直线方程为 $y = kx + 2$，与椭圆 $\\dfrac{x^2}{4} + y^2 = 1$ 联立，得：\n$$(1+4k^2)x^2 + 16kx + 12 = 0$$\n设 $A(x_1,y_1), B(x_2,y_2)$，由 $\\overrightarrow{EA} = \\lambda \\overrightarrow{EB}$ 得 $x_1 = \\lambda x_2$。\n结合韦达定理 $x_1+x_2 = -\\dfrac{16k}{1+4k^2}, x_1x_2 = \\dfrac{12}{1+4k^2}$，消元化简得：\n$$\\dfrac{\\lambda}{(1+\\lambda)^2} = \\dfrac{3}{64}\\left(\\dfrac{1}{k^2} + 4\\right)$$\n由判别式 $\\Delta \\ge 0$ 得 $k^2 \\ge \\dfrac{3}{4}$，代入上式右端可得：\n$$\\dfrac{3}{16} < \\dfrac{\\lambda}{(1+\\lambda)^2} \\le \\dfrac{1}{4}$$\n解得 $\\dfrac{1}{3} < \\lambda < 3$。\n综上，实数 $\\lambda$ 的取值范围为：\n$$\\left[\\dfrac{1}{3}, 3\\right]$$"
+  },
+  {
+    "id": "hyperbola_equation_line_intersection_area_001",
+    "topic": "hyperbola",
+    "difficulty": 3,
+    "subtopics": ["双曲线标准方程", "直线与双曲线相交", "三角形面积计算"],
+    "source": "高考复习题",
+    "problem": "已知双曲线 $C: \\dfrac{x^2}{a^2} - \\dfrac{y^2}{b^2} = 1$（$a>0,b>0$）的两个焦点分别为 $(-2,0)$ 和 $(2,0)$，点 $P(3,\\sqrt{7})$ 在双曲线 $C$ 上。\n\n(Ⅰ) 求双曲线 $C$ 的方程；\n\n(Ⅱ) 过点 $A(0,2)$ 的直线与双曲线 $C$ 交于不同的两点 $E,F$，若坐标原点 $O$ 与 $E,F$ 构成的三角形面积为 $2\\sqrt{2}$，求直线 $l$ 的方程。",
+    "solution": "(Ⅰ) 求双曲线 $C$ 的方程：\n双曲线焦点为 $(\\pm2,0)$，故 $c=2$，则 $a^2+b^2=c^2=4$。\n将点 $P(3,\\sqrt{7})$ 代入双曲线方程 $\\dfrac{x^2}{a^2} - \\dfrac{y^2}{b^2} = 1$，得：\n$$\\dfrac{9}{a^2} - \\dfrac{7}{b^2} = 1$$\n联立 $a^2+b^2=4$，解得 $a^2=2, b^2=2$（舍去 $a^2=18$）。\n因此，双曲线 $C$ 的方程为：\n$$\\dfrac{x^2}{2} - \\dfrac{y^2}{2} = 1 \\quad \\text{即} \\quad x^2 - y^2 = 2$$\n\n(Ⅱ) 求直线 $l$ 的方程：\n设直线 $l$ 的方程为 $y = kx + 2$，代入双曲线方程 $x^2 - y^2 = 2$，整理得：\n$$(1-k^2)x^2 - 4kx - 6 = 0$$\n直线与双曲线交于不同两点，故：\n$$\\begin{cases} 1-k^2 \\neq 0 \\\\ \\Delta = 16k^2 + 24(1-k^2) > 0 \\end{cases}$$\n解得 $k \\in (-\\sqrt{3},-1) \\cup (1,\\sqrt{3})$。\n设 $E(x_1,y_1), F(x_2,y_2)$，由韦达定理：\n$$x_1+x_2 = \\dfrac{4k}{1-k^2}, \\quad x_1x_2 = \\dfrac{-6}{1-k^2}$$\n三角形 $OEF$ 的面积 $S = \\dfrac{1}{2} \\cdot |OA| \\cdot |x_1 - x_2| = |x_1 - x_2|$，由 $S=2\\sqrt{2}$ 得：\n$$|x_1 - x_2| = \\sqrt{(x_1+x_2)^2 - 4x_1x_2} = 2\\sqrt{2}$$\n代入韦达定理结果，化简得 $k^2=2$，故 $k=\\pm\\sqrt{2}$。\n因此，直线 $l$ 的方程为：\n$$y = \\sqrt{2}x + 2 \\quad \\text{和} \\quad y = -\\sqrt{2}x + 2$$"
+}
+
+]

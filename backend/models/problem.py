@@ -16,6 +16,8 @@ class Point(BaseModel):
     y: str
     #绘图时标注文字的偏移量
     label_offset: tuple[float, float] = (0.15, 0.15)
+    show_coordinates: bool = False
+    display_label: Optional[str] = None
 
     #将 sympy 表达式求值并转换为浮点数
     def to_float(self) -> tuple[float, float]:
@@ -52,6 +54,7 @@ class ConicParams(BaseModel):
     # Polar conic: r = ed/(1 ± e·cosθ)
     eccentricity: Optional[str] = None
     focal_distance: Optional[str] = None  # d in the polar form
+    display_equation_latex: Optional[str] = None
 
 #题目对象
 class ProblemParams(BaseModel):
@@ -105,9 +108,11 @@ class ValidationResult(BaseModel):
 class Problem(BaseModel):
     """Final output object returned to the frontend."""
     problem_id: str
-    params: ProblemParams
+    params: Optional[ProblemParams]
     latex_problem: str
     image_base64: str
     reasoning_trace: list[ReasoningStep] = []
+    solution: Optional[str] = None
     solution_latex: Optional[str] = None  # populated on demand
     generation_config: dict = {}
+    is_fallback: bool = False

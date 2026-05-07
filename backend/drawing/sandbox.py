@@ -12,6 +12,8 @@ import tempfile
 import textwrap
 from pathlib import Path
 
+from sympy import sympify
+
 from models.problem import ProblemParams
 
 #子进程最长允许运行 20 秒
@@ -24,6 +26,19 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from sympy import sympify
+import matplotlib.font_manager as _fm
+
+_candidates = [
+    "Microsoft YaHei", "SimHei", "SimSun",
+    "Noto Sans CJK SC", "Noto Sans SC",
+    "WenQuanYi Micro Hei", "Arial Unicode MS",
+    "PingFang SC", "Heiti SC",
+]
+_available = {{f.name for f in _fm.fontManager.ttflist}}
+_matched = [name for name in _candidates if name in _available]
+plt.rcParams["font.sans-serif"] = _matched or _candidates
+plt.rcParams["font.family"] = "sans-serif"
+plt.rcParams["axes.unicode_minus"] = False
 
 # ── Injected parameters 参数注入模块(do NOT modify these values) ──────────────────────────
 {param_block}
@@ -37,45 +52,57 @@ plt.savefig(buf, format="png", dpi=120, bbox_inches="tight")
 plt.close("all")
 buf.seek(0)
 #子进程与父进程通信的唯一通道：父进程通过捕获子进程的 stdout 来获取 Base64 字符串
-print(base64.b64encode(buf.read()).decode(), end="")
+import base64 as _b64
+_raw = _b64.b64encode(buf.read()).decode()
+print("".join(_raw.split()), end="")
 '''
 
 #将 ProblemParams 对象中的数学参数转换为可供 LLM 代码直接使用的 Python 变量赋值语句
 #LLM 生成的代码就可以直接使用 a, b, F1_x, F1_y 等变量名，而不必嵌入硬编码数字
-def _build_param_block(params: ProblemParams) -> str:
+def _build_param_block(params: ProblemParams) -> tuple[str, list[str]]:
     """
     Build a Python variable block from ProblemParams so the LLM code
     can reference named variables instead of raw numbers.
     """
-    lines = []
+    lines: list[str] = []
+    injected_vars: list[str] = []
     c = params.conic
-    if c.a:
-        lines.append(f"a = float(sympify({c.a!r}))")
-    if c.b:
-        lines.append(f"b = float(sympify({c.b!r}))")
-    if c.c:
-        lines.append(f"c_focal = float(sympify({c.c!r}))")
-    if c.p:
-        lines.append(f"p = float(sympify({c.p!r}))")
-    if c.eccentricity:
-        lines.append(f"e = float(sympify({c.eccentricity!r}))")
+
+    def _append_numeric_var(name: str, expr: str | None) -> None:
+        if not expr:
+            return
+        try:
+            val = float(sympify(expr))
+            lines.append(f"{name} = {val}")
+            injected_vars.append(name)
+        except Exception:
+            pass
+
+    _append_numeric_var("a", c.a)
+    _append_numeric_var("b", c.b)
+    _append_numeric_var("c_focal", c.c)
+    _append_numeric_var("p", c.p)
+    _append_numeric_var("e", c.eccentricity)
 
     for i, pt in enumerate(params.key_points):
         vname = pt.name.replace("₁", "1").replace("₂", "2").replace(" ", "_")
-        lines.append(f"{vname}_x = float(sympify({pt.x!r}))")
-        lines.append(f"{vname}_y = float(sympify({pt.y!r}))")
+        _append_numeric_var(f"{vname}_x", pt.x)
+        _append_numeric_var(f"{vname}_y", pt.y)
+        lines.append(f"{vname}_label = {repr(pt.display_label or pt.name)}")
+        lines.append(f"{vname}_show_coordinates = {pt.show_coordinates}")
+        injected_vars.extend([f"{vname}_label", f"{vname}_show_coordinates"])
 
     for i, ln in enumerate(params.lines):
-        if ln.slope:
-            lines.append(f"line{i}_slope = float(sympify({ln.slope!r}))")
-        if ln.intercept:
-            lines.append(f"line{i}_intercept = float(sympify({ln.intercept!r}))")
-        if ln.x_fixed:
-            lines.append(f"line{i}_x_fixed = float(sympify({ln.x_fixed!r}))")
+        _append_numeric_var(f"line{i}_slope", ln.slope)
+        _append_numeric_var(f"line{i}_intercept", ln.intercept)
+        _append_numeric_var(f"line{i}_x_fixed", ln.x_fixed)
 
+    lines.append(f"display_equation_latex = {repr(c.display_equation_latex or '')}")
+    injected_vars.append("display_equation_latex")
     lines.append(f"plot_x_min, plot_x_max = {params.plot_range_x[0]}, {params.plot_range_x[1]}")
     lines.append(f"plot_y_min, plot_y_max = {params.plot_range_y[0]}, {params.plot_range_y[1]}")
-    return "\n".join(lines)
+    injected_vars.extend(["plot_x_min", "plot_x_max", "plot_y_min", "plot_y_max"])
+    return "\n".join(lines), injected_vars
 
 
 def execute_drawing_code(code: str, params: ProblemParams) -> tuple[str, str | None]:
@@ -88,11 +115,12 @@ def execute_drawing_code(code: str, params: ProblemParams) -> tuple[str, str | N
         On failure: ("", error_message)
     """
     #调用 _build_param_block(params) 得到变量定义语句
-    param_block = _build_param_block(params)
+    param_block, _ = _build_param_block(params)
+    code = textwrap.dedent(code).strip()
     #将参数块和用户代码嵌入模板
     script = _HARNESS_TEMPLATE.format(
         param_block=param_block,
-        user_code=textwrap.dedent(code),
+        user_code=code,
     )
 
     #生成一个 .py 文件，将脚本写入磁盘

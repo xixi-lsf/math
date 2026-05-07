@@ -78,7 +78,7 @@ function StepCard({ step, isLast }: { step: ReasoningStep; isLast: boolean }) {
             </p>
           )}
           {step.tool_output_summary && (
-            <p className="mt-0.5 text-[10px] opacity-60 truncate">
+            <p className="mt-0.5 text-[10px] opacity-60 whitespace-pre-wrap break-words leading-relaxed">
               → {step.tool_output_summary}
             </p>
           )}

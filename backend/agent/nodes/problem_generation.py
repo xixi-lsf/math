@@ -9,6 +9,8 @@ import uuid
 from openai import OpenAI
 
 from agent.state import AgentState
+from agent.logger import log_step
+from knowledge.vectordb import get_store
 from models.problem import (
     ProblemParams, ConicParams, Point, LineParams, ReasoningStep
 )
@@ -21,6 +23,14 @@ _DIFFICULTY_HINTS = {
     3: "中等题，需要联立方程或综合两个知识点",
     4: "较难题，需要多步推导，可能涉及参数讨论",
     5: "竞赛难度，需要巧妙构造或多个知识点综合",
+}
+
+_DIFFICULTY_DESCRIPTIONS = {
+    1: "一步推导，直接套公式即可",
+    2: "两步推导，涉及基本性质",
+    3: "需要综合两个知识点，有一定计算量",
+    4: "条件隐蔽，需要多步推导和换元",
+    5: "竞赛水平，需要构造辅助元素或多种方法结合",
 }
 
 _TOPIC_NAMES = {
@@ -55,7 +65,7 @@ def problem_generation_node(state: AgentState) -> dict:
     topic = state["topic"]
     difficulty = state["difficulty"]
     chunks = state.get("retrieved_knowledge", [])
-    retry_count = state.get("retry_count", 0)
+    generation_retry = state.get("generation_retry", 0)
     step_id = state.get("step_counter", 0)
     llm = _get_llm(state)
     cfg = state.get("llm_config", {})
@@ -63,12 +73,28 @@ def problem_generation_node(state: AgentState) -> dict:
 
     #获取topic,难度提示词，从知识库检索的知识（字符串）
     topic_cn = _TOPIC_NAMES.get(topic, topic)
-    difficulty_hint = _DIFFICULTY_HINTS.get(difficulty, "")
+    difficulty_label = _DIFFICULTY_HINTS.get(difficulty, "")
+    difficulty_desc = _DIFFICULTY_DESCRIPTIONS[difficulty]
     knowledge_ctx = _knowledge_context(chunks)
+
+    # 难度≥3时检索例题
+    example_section = ""
+    if difficulty >= 3:
+        examples = get_store().retrieve_examples(
+            topic=topic,
+            difficulty=difficulty,
+            n=2,
+        )
+        if examples:
+            example_section = (
+                "\n\n参考例题（基于以下例题的结构进行改编，"
+                "必须修改数值和问法，不得直接复制）：\n"
+                + "\n\n".join(examples)
+            )
 
     #重试提示：将 validation_result 中的错误详情和建议修正加入提示，引导 LLM 改进
     retry_hint = ""
-    if retry_count > 0:
+    if generation_retry > 0:
         prev_result = state.get("validation_result")
         if prev_result and prev_result.error_detail:
             retry_hint = f"\n\n【上次生成的题目存在问题，请重新生成】\n错误：{prev_result.error_detail}\n建议：{prev_result.suggested_fix or '请调整参数'}"
@@ -76,7 +102,7 @@ def problem_generation_node(state: AgentState) -> dict:
     system_prompt = f"""你是一位专业的高中/竞赛数学出题专家，擅长解析几何。
 请根据要求生成一道关于【{topic_cn}】的解析几何题目。
 
-难度要求：{difficulty}/5 — {difficulty_hint}
+难度要求：{difficulty}/5 — {difficulty_label}
 
 相关知识点参考：
 {knowledge_ctx}
@@ -88,7 +114,17 @@ def problem_generation_node(state: AgentState) -> dict:
 4. 参数选取要合理（如椭圆 a>b>0，抛物线 p>0）
 5. 只输出题干文本，不要输出解答过程{retry_hint}"""
 
-    user_prompt = f"请生成一道难度为 {difficulty}/5 的{topic_cn}解析几何题目。"
+    user_prompt = f"""
+请生成一道关于【{topic_cn}】的解析几何题目。
+难度等级：{difficulty}/5（{difficulty_label}）
+子知识点：{state.get("subtopics", [])}
+参考知识点：{knowledge_ctx}{example_section}
+
+要求：
+- 题目必须数学严谨，条件不矛盾，有唯一确定的答案
+- 难度{difficulty_label}意味着：{difficulty_desc}
+- 使用标准 LaTeX 格式输出题干
+"""
 
     response = llm.chat.completions.create(
         model=model,
@@ -110,14 +146,21 @@ def problem_generation_node(state: AgentState) -> dict:
         action=f"LLM 生成题干（难度{difficulty}，{topic_cn}）",
         tool_called=f"LLM.chat ({model})",
         tool_input_summary=f"topic={topic}, difficulty={difficulty}",
-        tool_output_summary=latex_problem[:120] + ("..." if len(latex_problem) > 120 else ""),
+        tool_output_summary=latex_problem,
     )
+
+    q = state.get("step_queue")
+    if q is not None:
+        q.put_nowait(step)
+    log_step(step, full_output=latex_problem)
 
     #生成的题目文本，追加一条推理记录，步骤计数器+1
     return {
         "latex_problem": latex_problem,
+        "solution": None,
         "reasoning_trace": state.get("reasoning_trace", []) + [step],
         "step_counter": step_id + 1,
+        "generation_retry": generation_retry + 1,
     }
 
 
@@ -143,6 +186,8 @@ _PARAM_SCHEMA = {
                     "name": {"type": "string"},
                     "x": {"type": "string"},
                     "y": {"type": "string"},
+                    "show_coordinates": {"type": "boolean"},
+                    "display_label": {"type": "string"},
                 },
                 "required": ["name", "x", "y"],
             },
@@ -156,11 +201,16 @@ _PARAM_SCHEMA = {
                     "slope": {"type": "string"},
                     "intercept": {"type": "string"},
                     "x_fixed": {"type": "string"},
+                    "x1": {"type": "string", "description": "线段起点x坐标，sympy表达式"},
+                    "y1": {"type": "string", "description": "线段起点y坐标，sympy表达式"},
+                    "x2": {"type": "string", "description": "线段终点x坐标，sympy表达式"},
+                    "y2": {"type": "string", "description": "线段终点y坐标，sympy表达式"},
                 },
             },
         },
         "answer": {"type": "string", "description": "最终答案，sympy表达式"},
         "problem_type": {"type": "string", "description": "题型，如 focal_chord, tangent_line, area"},
+        "display_equation_latex": {"type": "string", "description": "图上应显示的曲线方程；若题干未给出具体方程，则保留符号形式如 \\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1，不要暴露求解后的具体数值"},
         "plot_range_x": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
         "plot_range_y": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
     },
@@ -180,10 +230,23 @@ def param_extraction_node(state: AgentState) -> dict:
 规则：
 1. 所有数值用 sympy 表达式字符串表示（如 "2", "sqrt(3)", "1/2"）
 2. key_points 包含题目中所有命名点（焦点、顶点、交点等）及其坐标
-3. lines 包含题目中所有直线的参数
+3. lines 包含题目中所有直线的参数：
+   - 如果是有端点的线段（如焦点弦、切线段），请同时填写 x1/y1/x2/y2 端点坐标
+   - 如果是延伸到视口边界的完整直线，只填 slope/intercept 或 x_fixed
+   - 如果只知道斜率和直线上某一点（点斜式），填写 slope 和 x1/y1，不填 intercept
 4. answer 是题目要求求的量的答案（如果能从题目推断）
 5. plot_range_x/y 根据曲线参数合理设置视口范围
-6. curve_type 必须是以下之一：ellipse, hyperbola, parabola, polar_conic（极坐标圆锥曲线用 polar_conic，不要用 polar）"""
+6. curve_type 必须是以下之一：ellipse, hyperbola, parabola, polar_conic（极坐标圆锥曲线用 polar_conic，不要用 polar）
+7. key_points 处理规则：
+   - 如果点的坐标可以从题目已知条件直接算出（如焦点、顶点、题目给定坐标的点），必须计算出具体数值填入 x/y
+   - 如果点的坐标是题目的待求量或不定点（如"椭圆上满足某条件的点P"但坐标未知），不要把它加入 key_points，因为无法画出准确位置
+   - 对于类似"P在椭圆上，|PF1|=3"，"P在椭圆内部"，"P在椭圆外侧"的情况，P的坐标可以通过联立方程算出值或者范围，请计算后填入
+8. 允许为每个点额外返回：
+   - show_coordinates：只有题干中明确给出该点坐标时才设为 true，否则设为 false
+   - display_label：图上显示的标签文本；通常直接使用点名即可
+9. display_equation_latex 表示图上应该显示的曲线方程：
+   - 如果题干明确给出了具体数值方程，可保留该数值形式
+   - 如果题干没有直接给出具体方程，即使内部已经算出参数，也要返回符号形式（如 \\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1 或 y^2=2px），不要暴露求解出的具体数字"""
 
     response = llm.chat.completions.create(
         model=model,
@@ -218,6 +281,7 @@ def param_extraction_node(state: AgentState) -> dict:
         eccentricity=data.get("eccentricity"),
         focal_distance=data.get("focal_distance"),
         orientation=data.get("orientation", "horizontal"),
+        display_equation_latex=data.get("display_equation_latex"),
     )
 
     raw_points = data.get("key_points", [])
@@ -228,7 +292,13 @@ def param_extraction_node(state: AgentState) -> dict:
         if not isinstance(pt, dict):
             continue
         try:
-            key_points.append(Point(name=pt["name"], x=str(pt["x"]), y=str(pt["y"])))
+            key_points.append(Point(
+                name=pt["name"],
+                x=str(pt["x"]),
+                y=str(pt["y"]),
+                show_coordinates=bool(pt.get("show_coordinates", False)),
+                display_label=pt.get("display_label"),
+            ))
         except Exception:
             pass
 
@@ -245,6 +315,10 @@ def param_extraction_node(state: AgentState) -> dict:
                 slope=ln.get("slope"),
                 intercept=ln.get("intercept"),
                 x_fixed=ln.get("x_fixed"),
+                x1=str(ln["x1"]) if ln.get("x1") is not None else None,
+                y1=str(ln["y1"]) if ln.get("y1") is not None else None,
+                x2=str(ln["x2"]) if ln.get("x2") is not None else None,
+                y2=str(ln["y2"]) if ln.get("y2") is not None else None,
             ))
         except Exception:
             pass
@@ -256,6 +330,28 @@ def param_extraction_node(state: AgentState) -> dict:
     if not isinstance(plot_y, list) or len(plot_y) < 2:
         plot_y = [-5.0, 5.0]
 
+    # 自动扩展视口以包含所有关键点
+    if key_points:
+        try:
+            from sympy import sympify as _sympify
+            all_x = [float(_sympify(pt.x)) for pt in key_points]
+            all_y = [float(_sympify(pt.y)) for pt in key_points]
+            margin = 1.5
+            auto_x_min = min(all_x) - margin
+            auto_x_max = max(all_x) + margin
+            auto_y_min = min(all_y) - margin
+            auto_y_max = max(all_y) + margin
+            final_x = (min(float(plot_x[0]), auto_x_min),
+                       max(float(plot_x[1]), auto_x_max))
+            final_y = (min(float(plot_y[0]), auto_y_min),
+                       max(float(plot_y[1]), auto_y_max))
+        except Exception:
+            final_x = (float(plot_x[0]), float(plot_x[1]))
+            final_y = (float(plot_y[0]), float(plot_y[1]))
+    else:
+        final_x = (float(plot_x[0]), float(plot_x[1]))
+        final_y = (float(plot_y[0]), float(plot_y[1]))
+
     params = ProblemParams(
         problem_id=str(uuid.uuid4())[:8],
         topic=state["topic"],
@@ -265,8 +361,8 @@ def param_extraction_node(state: AgentState) -> dict:
         key_points=key_points,
         lines=lines,
         answer=str(data.get("answer", "") or ""),
-        plot_range_x=(float(plot_x[0]), float(plot_x[1])),
-        plot_range_y=(float(plot_y[0]), float(plot_y[1])),
+        plot_range_x=final_x,
+        plot_range_y=final_y,
     )
 
     step = ReasoningStep(
@@ -277,6 +373,11 @@ def param_extraction_node(state: AgentState) -> dict:
         tool_input_summary="题干 → JSON 参数",
         tool_output_summary=f"curve={conic.curve_type}, a={conic.a}, b={conic.b}, points={len(key_points)}",
     )
+
+    q = state.get("step_queue")
+    if q is not None:
+        q.put_nowait(step)
+    log_step(step, full_output=raw_json)
 
     return {
         "params": params,

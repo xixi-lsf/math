@@ -31,7 +31,12 @@ export default function LLMConfigPanel({ config, onChange }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(local),
       })
-      const data = await res.json()
+      const text = await res.text()
+      if (!text) {
+        setTestResult({ ok: false, msg: '后端无响应，请确认服务已启动' })
+        return
+      }
+      const data = JSON.parse(text)
       setTestResult({ ok: data.valid, msg: data.valid ? `连接成功：${data.reply}` : data.error })
     } catch (e) {
       setTestResult({ ok: false, msg: String(e) })

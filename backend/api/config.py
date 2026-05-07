@@ -28,4 +28,5 @@ async def validate_llm(config: LLMConfig):
         reply = response.choices[0].message.content.strip()
         return {"valid": True, "reply": reply, "model": config.model}
     except Exception as e:
-        return {"valid": False, "error": str(e)}
+        error_msg = str(e).split("\n")[0][:200]
+        return {"valid": False, "error": error_msg}

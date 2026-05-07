@@ -1,0 +1,48 @@
+[
+  {
+    "id": "parabola_focal_chord_001",
+    "topic": "parabola",
+    "difficulty": 3,
+    "subtopics": ["focus", "directrix", "focal_length"],
+    "source": "2025全国二卷高考镇题",
+    "problem": "设抛物线 $C:y^2=2px(p>0)$ 的焦点为 $F$，点 $A$ 在 $C$ 上，过 $A$ 作 $C$ 的准线的垂线，垂足为 $B$，若直线 $BF$ 的方程为 $y=-2x+2$，则 $|AF|=$？",
+    "solution": "（1）求焦点与参数 $p$：\n直线 $BF:y=-2x+2$ 与 $x$ 轴的交点即为焦点 $F$，令 $y=0$，得 $x=1$，故 $F(1,0)$。\n\n由抛物线焦点坐标 $\\left(\\dfrac{p}{2},0\\right)$，得 $\\dfrac{p}{2}=1$，即 $p=2$。\n\n因此抛物线方程为 $y^2=4x$，准线方程为 $x=-1$。\n\n（2）求点 $B$ 与点 $A$ 的坐标：\n设 $A(x_0,y_0)$，则垂足 $B(-1,y_0)$。\n\n将 $B(-1,y_0)$ 代入直线 $BF$ 的方程 $y=-2x+2$，得：\n$$\ny_0=-2\\times(-1)+2=4\n$$\n\n将 $A(x_0,4)$ 代入抛物线方程 $y^2=4x$，得：\n$$\n4^2=4x_0 \\implies x_0=4\n$$\n\n（3）计算 $|AF|$：\n根据抛物线的定义，抛物线上的点到焦点的距离等于到准线的距离：\n$$\n|AF|=x_0+\\frac{p}{2}=4+1=5\n$$\n\n所以 $|AF|=5$。"
+  },
+  {
+    "id": "parabola_line_intersection_area_max_001",
+    "topic": "parabola",
+    "difficulty": 3,
+    "subtopics": ["line_intersection", "vector_sum", "triangle_area_maximization"],
+    "source": "高考模拟题",
+    "problem": "已知直线 $l: y = kx - 2$ 与抛物线 $C: x^2 = -2py(p > 0)$ 交于 $A,B$ 两点，$O$ 为坐标原点，$\\overrightarrow{OA} + \\overrightarrow{OB} = (-4, -12)$。\n\n（I）求直线 $l$ 和抛物线 $C$ 的方程；\n\n（II）抛物线上一动点 $P$ 从 $A$ 到 $B$ 运动时，求 $\\triangle ABP$ 面积的最大值。",
+    "solution": "（I）求直线和抛物线方程：\n联立直线 $l$ 与抛物线 $C$ 的方程：\n$$\n\\begin{cases}\ny = kx - 2 \\\\\nx^2 = -2py\n\\end{cases}\n$$\n消去 $y$ 得：\n$$\nx^2 + 2pkx - 4p = 0\n$$\n设 $A(x_1, y_1), B(x_2, y_2)$，由韦达定理：\n$$\nx_1 + x_2 = -2pk,\\quad y_1 + y_2 = k(x_1 + x_2) - 4 = -2pk^2 - 4\n$$\n\n已知 $\\overrightarrow{OA} + \\overrightarrow{OB} = (x_1 + x_2, y_1 + y_2) = (-4, -12)$，故：\n$$\n\\begin{cases}\n-2pk = -4 \\\\\n-2pk^2 - 4 = -12\n\\end{cases}\n$$\n解得 $p=1, k=2$。\n\n因此，直线 $l$ 的方程为 $y = 2x - 2$，抛物线 $C$ 的方程为 $x^2 = -2y$。\n\n（II）求 $\\triangle ABP$ 面积的最大值：\n首先计算弦长 $|AB|$。联立方程得 $x^2 + 4x - 4 = 0$，则：\n$$\n|AB| = \\sqrt{1+k^2} \\cdot \\sqrt{(x_1+x_2)^2 - 4x_1x_2} = \\sqrt{1+2^2} \\cdot \\sqrt{(-4)^2 - 4(-4)} = 4\\sqrt{10}\n$$\n\n设抛物线上点 $P(t, -\\dfrac{1}{2}t^2)$，点 $P$ 到直线 $l: 2x - y - 2 = 0$ 的距离为：\n$$\nd = \\dfrac{|2t + \\dfrac{1}{2}t^2 - 2|}{\\sqrt{2^2 + (-1)^2}} = \\dfrac{|(t+2)^2 - 4|}{\\sqrt{5}}\n$$\n\n当 $t=-2$ 时，距离 $d$ 取得最大值：\n$$\nd_{\\text{max}} = \\dfrac{4}{\\sqrt{5}} = \\dfrac{4\\sqrt{5}}{5}\n$$\n\n此时，$\\triangle ABP$ 的面积最大值为：\n$$\nS_{\\text{max}} = \\dfrac{1}{2} \\cdot |AB| \\cdot d_{\\text{max}} = \\dfrac{1}{2} \\cdot 4\\sqrt{10} \\cdot \\dfrac{4\\sqrt{5}}{5} = 8\\sqrt{2}\n$$"
+  },
+  {
+    "id": "parabola_focal_line_area_proof_001",
+    "topic": "parabola",
+    "difficulty": 4,
+    "subtopics": ["focal_line", "triangle_area", "vector_proportionality"],
+    "source": "竞赛模拟题",
+    "problem": "已知点 $F$ 为抛物线 $C:y^2=4x$ 的焦点，点 $P$ 是准线 $l$ 上的动点，直线 $PF$ 交抛物线 $C$ 于 $A,B$ 两点，若点 $P$ 的纵坐标为 $m(m \\neq 0)$，点 $D$ 为准线 $l$ 与 $x$ 轴的交点。\n\n（I）求直线 $PF$ 的方程；\n\n（II）求 $\\triangle DAB$ 的面积 $S$ 范围；\n\n（III）设 $\\overrightarrow{AF} = \\lambda \\overrightarrow{FB}$，$\\overrightarrow{AP} = \\mu \\overrightarrow{PB}$，求证 $\\lambda + \\mu$ 为定值。",
+    "solution": "（I）求直线 $PF$ 的方程：\n抛物线 $y^2=4x$ 的焦点为 $F(1,0)$，准线为 $x=-1$，点 $P$ 在准线上，故 $P(-1,m)$。\n\n直线 $PF$ 的斜率为 $k = \\dfrac{m-0}{-1-1} = -\\dfrac{m}{2}$，由点斜式得直线方程：\n$$\ny = -\\dfrac{m}{2}(x-1)\n$$\n整理为 $mx + 2y - m = 0$。\n\n（II）求 $\\triangle DAB$ 的面积 $S$ 范围：\n联立直线 $PF$ 与抛物线方程：\n$$\n\\begin{cases}\ny = -\\dfrac{m}{2}(x-1) \\\\\ny^2 = 4x\n\\end{cases}\n$$\n消去 $y$ 得：\n$$\nm^2x^2 - (2m^2 + 16)x + m^2 = 0\n$$\n\n设 $A(x_1,y_1), B(x_2,y_2)$，由韦达定理：\n$$\nx_1 + x_2 = \\dfrac{2m^2 + 16}{m^2},\\quad x_1x_2 = 1\n$$\n\n由抛物线定义，弦长 $|AB| = x_1 + x_2 + 2 = \\dfrac{4m^2 + 16}{m^2}$。\n\n点 $D(-1,0)$ 到直线 $mx + 2y - m = 0$ 的距离：\n$$\nd = \\dfrac{|m(-1) + 2 \\times 0 - m|}{\\sqrt{m^2 + 4}} = \\dfrac{2|m|}{\\sqrt{m^2 + 4}}\n$$\n\n三角形面积：\n$$\nS = \\dfrac{1}{2} \\cdot |AB| \\cdot d = \\dfrac{1}{2} \\cdot \\dfrac{4(m^2 + 4)}{m^2} \\cdot \\dfrac{2|m|}{\\sqrt{m^2 + 4}} = 4\\sqrt{1 + \\dfrac{4}{m^2}}\n$$\n\n因 $m \\neq 0$，则 $\\dfrac{4}{m^2} > 0$，故 $S > 4$，即 $\\triangle DAB$ 的面积范围为 $(4, +\\infty)$。\n\n（III）证明 $\\lambda + \\mu$ 为定值：\n由 $\\overrightarrow{AF} = \\lambda \\overrightarrow{FB}$，得 $(1 - x_1, -y_1) = \\lambda(x_2 - 1, y_2)$，故 $\\lambda = \\dfrac{1 - x_1}{x_2 - 1}$。\n\n由 $\\overrightarrow{AP} = \\mu \\overrightarrow{PB}$，得 $(-1 - x_1, m - y_1) = \\mu(x_2 + 1, y_2 - m)$，故 $\\mu = \\dfrac{-1 - x_1}{x_2 + 1}$。\n\n因此：\n$$\n\\lambda + \\mu = \\dfrac{1 - x_1}{x_2 - 1} + \\dfrac{-1 - x_1}{x_2 + 1} = \\dfrac{(1 - x_1)(x_2 + 1) + (-1 - x_1)(x_2 - 1)}{(x_2 - 1)(x_2 + 1)}\n$$\n\n分子展开：\n$$\n(1 - x_1)(x_2 + 1) + (-1 - x_1)(x_2 - 1) = x_2 + 1 - x_1x_2 - x_1 - x_2 + 1 - x_1x_2 + x_1 = 2 - 2x_1x_2\n$$\n\n由（II）知 $x_1x_2 = 1$，代入得分子为 $2 - 2 \\times 1 = 0$，故 $\\lambda + \\mu = 0$，为定值。"
+  },
+  {
+    "id": "parabola_comparision_hard_001",
+    "topic": "parabola",
+    "difficulty": 5,
+    "subtopics": ["vector_collinearity", "tangent_equation", "dot_product", "triangle_area_minimization"],
+    "source": "高考模拟题",
+    "problem": "已知抛物线 $x^2 = 4y$ 的焦点为 $F$，$A, B$ 是抛物线上两动点，且 $\\overrightarrow{AF} = \\lambda \\cdot \\overrightarrow{FB} (\\lambda > 0)$，过 $A, B$ 两点分别作抛物线的切线，设其交点为 $M$。\n\n(1) 证明：$\\overrightarrow{FM} \\cdot \\overrightarrow{AB}$ 为定值；\n\n(2) 设 $\\triangle ABM$ 的面积为 $S$，写出 $S = f(\\lambda)$ 的表达式，并求 $S$ 的最小值。",
+    "solution": "(1) 证明 $\\overrightarrow{FM} \\cdot \\overrightarrow{AB}$ 为定值：\n抛物线 $x^2 = 4y$ 的焦点为 $F(0,1)$，设 $A(x_1, y_1), B(x_2, y_2)$，其中 $y_1 = \\dfrac{1}{4}x_1^2, y_2 = \\dfrac{1}{4}x_2^2$。\n\n由 $\\overrightarrow{AF} = \\lambda \\overrightarrow{FB}$，得 $(-x_1, 1 - y_1) = \\lambda(x_2, y_2 - 1)$，故：\n$$\n\\begin{cases}\n-x_1 = \\lambda x_2 \\\\\n1 - y_1 = \\lambda(y_2 - 1)\n\\end{cases}\n$$\n\n将 $y_1 = \\dfrac{1}{4}x_1^2, y_2 = \\dfrac{1}{4}x_2^2$ 代入，解得 $y_1 = \\lambda, y_2 = \\dfrac{1}{\\lambda}$，且 $x_1x_2 = -4$。\n\n抛物线的导数为 $y' = \\dfrac{1}{2}x$，故过 $A, B$ 的切线方程分别为：\n$$\ny = \\dfrac{1}{2}x_1x - \\dfrac{1}{4}x_1^2,\\quad y = \\dfrac{1}{2}x_2x - \\dfrac{1}{4}x_2^2\n$$\n\n两切线交点 $M$ 的坐标为 $\\left(\\dfrac{x_1 + x_2}{2}, -1\\right)$，故 $\\overrightarrow{FM} = \\left(\\dfrac{x_1 + x_2}{2}, -2\\right)$，$\\overrightarrow{AB} = (x_2 - x_1, y_2 - y_1)$。\n\n计算点积：\n$$\n\\overrightarrow{FM} \\cdot \\overrightarrow{AB} = \\dfrac{x_1 + x_2}{2}(x_2 - x_1) - 2(y_2 - y_1) = \\dfrac{1}{2}(x_2^2 - x_1^2) - 2\\left(\\dfrac{1}{4}x_2^2 - \\dfrac{1}{4}x_1^2\\right) = 0\n$$\n\n故 $\\overrightarrow{FM} \\cdot \\overrightarrow{AB}$ 为定值 $0$。\n\n(2) 求 $S = f(\\lambda)$ 的表达式及最小值：\n由(1)知 $FM \\perp AB$，故 $S = \\dfrac{1}{2}|AB| \\cdot |FM|$。\n\n$|AB| = |AF| + |BF| = y_1 + 1 + y_2 + 1 = \\lambda + \\dfrac{1}{\\lambda} + 2 = \\left(\\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}}\\right)^2$。\n\n$|FM| = \\sqrt{\\left(\\dfrac{x_1 + x_2}{2}\\right)^2 + (-2)^2} = \\sqrt{y_1 + y_2 + 2} = \\sqrt{\\lambda + \\dfrac{1}{\\lambda} + 2} = \\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}}$。\n\n因此：\n$$\nS = \\dfrac{1}{2} \\cdot \\left(\\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}}\\right)^2 \\cdot \\left(\\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}}\\right) = \\dfrac{1}{2}\\left(\\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}}\\right)^3\n$$\n\n由均值不等式 $\\sqrt{\\lambda} + \\dfrac{1}{\\sqrt{\\lambda}} \\ge 2$，当且仅当 $\\lambda = 1$ 时取等号，故 $S \\ge \\dfrac{1}{2} \\times 2^3 = 4$。\n\n因此，$S$ 的最小值为 $4$，此时 $\\lambda = 1$。"
+  },
+  {
+    "id": "parabola_focal_chord_perpendicular_proof_001",
+    "topic": "parabola",
+    "difficulty": 5,
+    "subtopics": ["focal_chord", "symmetry_point", "perpendicularity_proof", "distance_range"],
+    "source": "高考模拟题",
+    "problem": "已知抛物线 $C: y^2 = x$，过定点 $A(x_0, 0)\\left(x_0 \\ge \\dfrac{1}{8}\\right)$，作直线 $l$ 交抛物线于 $P, Q$（点 $P$ 在第一象限）。\n\n(Ⅰ) 当点 $A$ 是抛物线 $C$ 的焦点，且弦长 $|PQ| = 2$ 时，求直线 $l$ 的方程；\n\n(Ⅱ) 设点 $Q$ 关于 $x$ 轴的对称点为 $M$，直线 $PM$ 交 $x$ 轴于点 $B$，且 $BP \\perp BQ$。求证：点 $B$ 的坐标是 $(-x_0, 0)$，并求点 $B$ 到直线 $l$ 的距离 $d$ 的取值范围。",
+    "solution": "(Ⅰ) 求直线 $l$ 的方程：\n抛物线 $y^2 = x$ 的焦点为 $A\\left(\\dfrac{1}{4}, 0\\right)$，设直线 $l$ 的方程为 $x = ny + \\dfrac{1}{4}$，$P(x_1, y_1), Q(x_2, y_2)$。\n\n联立方程：\n$$\n\\begin{cases}\ny^2 = x \\\\\nx = ny + \\dfrac{1}{4}\n\\end{cases}\n$$\n得 $y^2 - ny - \\dfrac{1}{4} = 0$，则 $\\Delta = n^2 + 1 > 0$，$y_1 + y_2 = n$。\n\n弦长 $|PQ| = x_1 + x_2 + \\dfrac{1}{2} = n(y_1 + y_2) + 1 = n^2 + 1$，由 $|PQ| = 2$ 得 $n^2 = 1$，即 $n = \\pm 1$。\n\n因此直线 $l$ 的方程为 $x - y - \\dfrac{1}{4} = 0$ 或 $x + y - \\dfrac{1}{4} = 0$。\n\n(Ⅱ) 证明点 $B$ 的坐标并求距离范围：\n设直线 $l: x = my + x_0(m \\neq 0)$，联立 $y^2 = x$ 得 $y^2 - my - x_0 = 0$，则 $y_1 + y_2 = m$，$y_1y_2 = -x_0$。\n\n点 $Q$ 关于 $x$ 轴的对称点为 $M(x_2, -y_2)$，直线 $PM$ 交 $x$ 轴于 $B(x_B, 0)$。由 $\\overrightarrow{BM} \\parallel \\overrightarrow{BP}$，得：\n$$\n(y_1 + y_2)x_B = y_1y_2(y_1 + y_2)\n$$\n\n因 $y_1 + y_2 = m \\neq 0$，故 $x_B = y_1y_2 = -x_0$，即点 $B$ 的坐标为 $(-x_0, 0)$。\n\n由 $\\triangle BMQ$ 为等腰直角三角形，得 $k_{PB} = 1$，即 $\\dfrac{y_1 + y_2}{x_1 - x_2} = 1$，化简得 $y_1 - y_2 = 1$。\n\n平方得 $(y_1 + y_2)^2 - 4y_1y_2 = 1$，即 $m^2 + 4x_0 = 1$，故 $m^2 = 1 - 4x_0 > 0$，即 $x_0 < \\dfrac{1}{4}$。结合 $x_0 \\ge \\dfrac{1}{8}$，得 $\\dfrac{1}{8} \\le x_0 < \\dfrac{1}{4}$。\n\n点 $B(-x_0, 0)$ 到直线 $l: x - my - x_0 = 0$ 的距离：\n$$\nd = \\dfrac{2x_0}{\\sqrt{m^2 + 1}} = \\dfrac{2x_0}{\\sqrt{2 - 4x_0}}\n$$\n\n令 $t = \\dfrac{1}{x_0}$，则 $t \\in (4, 8]$，\n$$\nd = \\dfrac{\\sqrt{2}}{\\sqrt{t^2 - 2t}} = \\dfrac{\\sqrt{2}}{\\sqrt{(t-1)^2 - 1}} \\in \\left[\\dfrac{\\sqrt{6}}{12}, \\dfrac{1}{2}\\right)\n$$\n\n故点 $B$ 到直线 $l$ 的距离 $d$ 的取值范围为 $\\left[\\dfrac{\\sqrt{6}}{12}, \\dfrac{1}{2}\\right)$。"
+  }
+
+]

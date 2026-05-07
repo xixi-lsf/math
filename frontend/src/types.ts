@@ -15,6 +15,7 @@ export interface ProblemResult {
   image_base64: string
   drawing_path?: 'fast' | 'slow'
   params: Record<string, unknown>
+  is_fallback?: boolean
 }
 
 export type Topic = 'ellipse' | 'hyperbola' | 'parabola' | 'polar'

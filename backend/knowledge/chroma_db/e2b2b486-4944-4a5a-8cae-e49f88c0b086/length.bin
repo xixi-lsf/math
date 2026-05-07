@@ -1,0 +1,1 @@
+invalid type: string "(1) 求动点 $M$ 的轨迹 $D$ 的方程：\n双曲线 $C: \\dfrac{x^2}{4} - y^2 = 1$ 的顶点为 $A_1(-2,0), A_2(2,0)$。\n设 $P\\left(t, \\dfrac{\\sqrt{t^2-4}}{2}\\right)$，则 $Q\\left(t, -\\dfrac{\\sqrt{t^2-4}}{2}\\right)$。\n直线 $A_1P$ 的方程：$y = \\dfrac{\\sqrt{t^2-4}}{2(t+2)}(x+2)$，\n直线 $A_2Q$ 的方程：$y = -\\dfrac{\\sqrt{t^2-4}}{2(t-2)}(x-2)$。

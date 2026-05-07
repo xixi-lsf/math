@@ -36,7 +36,7 @@ export default function App() {
         }),
       })
       const data = await res.json()
-      setSolution(data.solution_latex ?? '')
+      setSolution(data.solution ?? data.solution_latex ?? '')
     } catch {
       setSolution('解题步骤生成失败，请重试。')
     } finally {
@@ -52,7 +52,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <FlaskConical size={20} className="text-indigo-600" />
             <span className="font-bold text-slate-900">解析几何题目生成系统</span>
-            <span className="text-xs text-slate-400 hidden sm:block">— LangGraph Agent</span>
+            <span className="text-xs text-slate-400 hidden sm:block">— Analytical Geometry Problem Generator</span>
           </div>
           <LLMConfigPanel config={llmConfig} onChange={setLlmConfig} />
         </div>

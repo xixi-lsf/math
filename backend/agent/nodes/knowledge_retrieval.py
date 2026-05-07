@@ -7,6 +7,7 @@ Node 1: Knowledge retrieval — ChromaDB + Tavily web search fallback.
 from __future__ import annotations
 import time
 from agent.state import AgentState
+from agent.logger import log_step, logger
 from models.problem import ReasoningStep
 from knowledge.vectordb import get_store
 
@@ -26,9 +27,11 @@ def knowledge_retrieval_node(state: AgentState) -> dict:
 
     # 1. ChromaDB retrieval,调用 store.retrieve，执行向量相似度搜索,返回最多 6 个最相关的知识片段（
     chunks = store.retrieve(query, topic, difficulty, n_results=6)
+    builtin_count = len(chunks)
 
     # 2. Also search user documents 检索用户自定义文档
     user_chunks = store.retrieve_user_docs(query, n_results=3)
+    user_count = len(user_chunks)
     chunks = chunks + user_chunks
 
     # 3. Tavily fallback if too few results若结果不足，触发 Tavily 网络搜索（备用）
@@ -62,6 +65,16 @@ def knowledge_retrieval_node(state: AgentState) -> dict:
         except Exception:
             pass
 
+    logger.info(
+        "[knowledge_retrieval] topic=%s difficulty=%s builtin=%s user_docs=%s total=%s web_used=%s",
+        topic,
+        difficulty,
+        builtin_count,
+        user_count,
+        len(chunks),
+        web_used,
+    )
+
     #构建推理步骤
     action = f"从知识库检索到 {len(chunks)} 条相关知识"
     if web_used:
@@ -75,6 +88,11 @@ def knowledge_retrieval_node(state: AgentState) -> dict:
         tool_input_summary=f"topic={topic}, difficulty={difficulty}",
         tool_output_summary=f"{len(chunks)} 条知识片段",
     )
+
+    q = state.get("step_queue")
+    if q is not None:
+        q.put_nowait(step)
+    log_step(step)
 
     return {
         "retrieved_knowledge": chunks,

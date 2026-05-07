@@ -4,6 +4,7 @@ import ProblemForm from './components/ProblemForm'
 import ReasoningTrace from './components/ReasoningTrace'
 import ProblemDisplay from './components/ProblemDisplay'
 import LLMConfigPanel from './components/LLMConfigPanel'
+import KnowledgeUpload from './components/KnowledgeUpload'
 import { loadConfig } from './config/llmConfig'
 import type { LLMConfig } from './config/llmConfig'
 import type { Topic } from './types'
@@ -13,13 +14,15 @@ export default function App() {
   const [llmConfig, setLlmConfig] = useState<LLMConfig>(loadConfig)
   const [solution, setSolution] = useState<string | null>(null)
   const [isSolving, setIsSolving] = useState(false)
+  const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<string[]>([])
+  const [selectedProblemIds, setSelectedProblemIds] = useState<string[]>([])
 
   const { steps, problem, isStreaming, error, start, reset } = useSSEStream()
 
   const handleGenerate = (topic: Topic, difficulty: number, subtopics: string[], config: LLMConfig) => {
     setSolution(null)
     reset()
-    start(topic, difficulty, subtopics, config)
+    start(topic, difficulty, subtopics, config, selectedKnowledgeIds, selectedProblemIds)
   }
 
   const handleRequestSolution = async () => {
@@ -79,6 +82,13 @@ export default function App() {
                 <ReasoningTrace steps={steps} isStreaming={isStreaming} />
               </div>
             )}
+
+            <KnowledgeUpload
+              onSelectionChange={(kIds, pIds) => {
+                setSelectedKnowledgeIds(kIds)
+                setSelectedProblemIds(pIds)
+              }}
+            />
           </div>
 
           {/* Right panel: problem display */}

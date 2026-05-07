@@ -77,20 +77,33 @@ def problem_generation_node(state: AgentState) -> dict:
     difficulty_desc = _DIFFICULTY_DESCRIPTIONS[difficulty]
     knowledge_ctx = _knowledge_context(chunks)
 
-    # 难度≥3时检索例题
+    # 检索例题（所有难度都检索，用户例题优先，内置例题补足）
     example_section = ""
-    if difficulty >= 3:
-        examples = get_store().retrieve_examples(
-            topic=topic,
-            difficulty=difficulty,
-            n=2,
+    selected_problem_ids: list[str] = state.get("selected_problem_ids", [])
+    store = get_store()
+
+    example_texts: list[str] = []
+
+    # 用户例题（仅当有勾选时）
+    if selected_problem_ids:
+        query = f"{topic_cn} 难度{difficulty} {' '.join(state.get('subtopics', []))}"
+        user_examples = store.retrieve_user_problems(
+            query, selected_problem_ids, n_results=2
         )
-        if examples:
-            example_section = (
-                "\n\n参考例题（基于以下例题的结构进行改编，"
-                "必须修改数值和问法，不得直接复制）：\n"
-                + "\n\n".join(examples)
-            )
+        example_texts.extend(user_examples)
+
+    # 内置例题补足（凑够 2 条）
+    remaining = max(0, 2 - len(example_texts))
+    if remaining > 0:
+        builtin_examples = store.retrieve_examples(topic=topic, difficulty=difficulty, n=remaining)
+        example_texts.extend(builtin_examples)
+
+    if example_texts:
+        example_section = (
+            "\n\n参考例题（基于以下例题的结构进行改编，"
+            "必须修改数值和问法，不得直接复制）：\n"
+            + "\n\n".join(example_texts)
+        )
 
     #重试提示：将 validation_result 中的错误详情和建议修正加入提示，引导 LLM 改进
     retry_hint = ""
@@ -241,9 +254,15 @@ def param_extraction_node(state: AgentState) -> dict:
    - 如果点的坐标可以从题目已知条件直接算出（如焦点、顶点、题目给定坐标的点），必须计算出具体数值填入 x/y
    - 如果点的坐标是题目的待求量或不定点（如"椭圆上满足某条件的点P"但坐标未知），不要把它加入 key_points，因为无法画出准确位置
    - 对于类似"P在椭圆上，|PF1|=3"，"P在椭圆内部"，"P在椭圆外侧"的情况，P的坐标可以通过联立方程算出值或者范围，请计算后填入
-8. 允许为每个点额外返回：
-   - show_coordinates：只有题干中明确给出该点坐标时才设为 true，否则设为 false
-   - display_label：图上显示的标签文本；通常直接使用点名即可
+8. 每个点必须返回 show_coordinates 字段：
+   - 默认值为 false
+   - 只有以下情况才设为 true：
+     题干里用文字明确写出了该点的具体数字坐标，
+     例如'点P(3,1)'、'点Q(0,2)'
+   - 以下情况一律设为 false：
+     焦点F、顶点A/B、交点、动点、题目中求解的点、
+     仅给出了参数坐标如F(p/2, 0)的点
+   - 宁可漏标也不要多标，多标坐标会暴露答案"
 9. display_equation_latex 表示图上应该显示的曲线方程：
    - 如果题干明确给出了具体数值方程，可保留该数值形式
    - 如果题干没有直接给出具体方程，即使内部已经算出参数，也要返回符号形式（如 \\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1 或 y^2=2px），不要暴露求解出的具体数字"""

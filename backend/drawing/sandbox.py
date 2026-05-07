@@ -57,6 +57,84 @@ _raw = _b64.b64encode(buf.read()).decode()
 print("".join(_raw.split()), end="")
 '''
 
+def _compute_viewport(params: ProblemParams) -> tuple[float, float, float, float]:
+    """
+    Compute a symmetric, complete viewport that:
+    1. Shows the full conic curve (symmetric around origin)
+    2. Contains all key points
+    Returns (x_min, x_max, y_min, y_max).
+    """
+    c = params.conic
+    # Start from curve extent
+    try:
+        if c.curve_type == "ellipse":
+            a = float(sympify(c.a)) if c.a else 3.0
+            b = float(sympify(c.b)) if c.b else 2.0
+            if c.orientation == "vertical":
+                a, b = b, a
+            curve_x, curve_y = a, b
+        elif c.curve_type == "hyperbola":
+            a = float(sympify(c.a)) if c.a else 2.0
+            b = float(sympify(c.b)) if c.b else 1.5
+            curve_x = a * 2.5
+            curve_y = b * 2.5
+        elif c.curve_type == "parabola":
+            p = float(sympify(c.p)) if c.p else 1.0
+            curve_x = p * 6
+            curve_y = p * 5
+        else:
+            curve_x, curve_y = 4.0, 4.0
+    except Exception:
+        curve_x, curve_y = 4.0, 4.0
+
+    # Collect all key point coordinates
+    pt_xs, pt_ys = [], []
+    for pt in params.key_points:
+        try:
+            px, py = float(sympify(pt.x)), float(sympify(pt.y))
+            pt_xs.append(px)
+            pt_ys.append(py)
+        except Exception:
+            pass
+
+    # Also consider line endpoints
+    for ln in params.lines:
+        for coord, lst in [(ln.x1, pt_xs), (ln.y1, pt_ys),
+                           (ln.x2, pt_xs), (ln.y2, pt_ys)]:
+            if coord is not None:
+                try:
+                    lst.append(float(sympify(coord)))
+                except Exception:
+                    pass
+
+    # Symmetric extent from curve
+    half_x = max(curve_x * 1.3, 2.0)
+    half_y = max(curve_y * 1.3, 2.0)
+
+    # Expand to include all points
+    if pt_xs:
+        half_x = max(half_x, max(abs(x) for x in pt_xs) * 1.3)
+    if pt_ys:
+        half_y = max(half_y, max(abs(y) for y in pt_ys) * 1.3)
+
+    # Round up to a clean value
+    import math
+    half_x = math.ceil(half_x)
+    half_y = math.ceil(half_y)
+
+    return -half_x, half_x, -half_y, half_y
+
+
+def _is_symbolic_equation(latex: str | None) -> bool:
+    """Return True if the display equation is symbolic (contains letter params like a, b, p)."""
+    if not latex:
+        return False
+    import re
+    # Symbolic if it contains variable letters used as parameters (a, b, p, e)
+    # but NOT if it's purely numeric (only digits, operators, sqrt, fractions with numbers)
+    return bool(re.search(r'(?<![a-zA-Z])[abpe](?![a-zA-Z0-9_])', latex))
+
+
 #将 ProblemParams 对象中的数学参数转换为可供 LLM 代码直接使用的 Python 变量赋值语句
 #LLM 生成的代码就可以直接使用 a, b, F1_x, F1_y 等变量名，而不必嵌入硬编码数字
 def _build_param_block(params: ProblemParams) -> tuple[str, list[str]]:
@@ -68,6 +146,12 @@ def _build_param_block(params: ProblemParams) -> tuple[str, list[str]]:
     injected_vars: list[str] = []
     c = params.conic
 
+    # Only inject numeric conic params (a, b, c, p) when the displayed equation
+    # is already numeric (i.e. the problem statement gives the explicit equation).
+    # If the equation is symbolic (e.g. x²/a²+y²/b²=1), injecting the solved
+    # values would leak the answer through the drawing code.
+    suppress_conic_params = _is_symbolic_equation(c.display_equation_latex)
+
     def _append_numeric_var(name: str, expr: str | None) -> None:
         if not expr:
             return
@@ -78,11 +162,12 @@ def _build_param_block(params: ProblemParams) -> tuple[str, list[str]]:
         except Exception:
             pass
 
-    _append_numeric_var("a", c.a)
-    _append_numeric_var("b", c.b)
-    _append_numeric_var("c_focal", c.c)
-    _append_numeric_var("p", c.p)
-    _append_numeric_var("e", c.eccentricity)
+    if not suppress_conic_params:
+        _append_numeric_var("a", c.a)
+        _append_numeric_var("b", c.b)
+        _append_numeric_var("c_focal", c.c)
+        _append_numeric_var("p", c.p)
+        _append_numeric_var("e", c.eccentricity)
 
     for i, pt in enumerate(params.key_points):
         vname = pt.name.replace("₁", "1").replace("₂", "2").replace(" ", "_")
@@ -102,6 +187,13 @@ def _build_param_block(params: ProblemParams) -> tuple[str, list[str]]:
     lines.append(f"plot_x_min, plot_x_max = {params.plot_range_x[0]}, {params.plot_range_x[1]}")
     lines.append(f"plot_y_min, plot_y_max = {params.plot_range_y[0]}, {params.plot_range_y[1]}")
     injected_vars.extend(["plot_x_min", "plot_x_max", "plot_y_min", "plot_y_max"])
+
+    # Pre-computed symmetric viewport (use these for set_xlim/set_ylim)
+    vx_min, vx_max, vy_min, vy_max = _compute_viewport(params)
+    lines.append(f"viewport_x_min, viewport_x_max = {vx_min}, {vx_max}")
+    lines.append(f"viewport_y_min, viewport_y_max = {vy_min}, {vy_max}")
+    injected_vars.extend(["viewport_x_min", "viewport_x_max", "viewport_y_min", "viewport_y_max"])
+
     return "\n".join(lines), injected_vars
 
 

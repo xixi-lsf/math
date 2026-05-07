@@ -61,5 +61,42 @@
     "source": "高考模拟题",
     "problem": "已知椭圆 $C: \\dfrac{x^2}{a^2} + \\dfrac{y^2}{b^2} = 1(a > b > 0)$ 的离心率为 $\\dfrac{\\sqrt{2}}{2}$，左、右焦点分别为 $F_1, F_2$，过 $F_2$ 的直线交 $C$ 于 $A, B$ 两点。若 $AF_1 \\perp AF_2$，求 $\\dfrac{|AF_2|}{|BF_2|} ",
     "solution": "设 $|AF_2| = t(t > 0)$，则由椭圆定义得 $|AF_1| = 2a - t$。\n\n椭圆的离心率 $e = \\dfrac{c}{a} = \\dfrac{\\sqrt{2}}{2}$，故 $a = \\sqrt{2}c$。\n\n由 $AF_1 \\perp AF_2$，根据勾股定理：\n$$\n|AF_1|^2 + |AF_2|^2 = |F_1F_2|^2\n$$\n即：\n$$\n(2a - t)^2 + t^2 = (2c)^2\n$$\n\n代入 $a = \\sqrt{2}c$：\n$$\n(2\\sqrt{2}c - t)^2 + t^2 = 4c^2\n$$\n\n解得 $t = \\sqrt{2}c$，故 $|AF_2| = \\sqrt{2}c$，$|AF_1| = 2a - t = \\sqrt{2}c$。\n\n在 $\\triangle ABF_1$ 中，$\\angle BAF_1 = 90^\\circ$，故：\n$$\n|AF_1|^2 + |AB|^2 = |BF_1|^2\n$$\n\n设 $|BF_2| = s$，则 $|AB| = t + s = \\sqrt{2}c + s$，$|BF_1| = 2a - s = 2\\sqrt{2}c - s$，代入得：\n$$\n(\\sqrt{2}c)^2 + (\\sqrt{2}c + s)^2 = (2\\sqrt{2}c - s)^2\n$$\n\n解得 $s = \\dfrac{\\sqrt{2}}{3}c$，即 $|BF_2| = \\dfrac{\\sqrt{2}}{3}c$。\n\n因此：\n$$\n\\dfrac{|AF_2|}{|BF_2|} = \\dfrac{\\sqrt{2}c}{\\dfrac{\\sqrt{2}}{3}c} = 3\n$$"
+  },
+  {
+    "id": "ellipse_focus_parabola_equation_001",
+    "topic": "ellipse",
+    "difficulty": 1,
+    "subtopics": ["椭圆焦点与离心率", "抛物线方程"],
+    "source": "基础练习题",
+    "problem": "已知抛物线的顶点在原点，焦点与椭圆 $4x^2 + 5y^2 = 20$ 的一个焦点相同。\n\n(1) 求椭圆的焦点坐标与离心率；\n\n(2) 求抛物线方程。",
+    "solution": "(1) 椭圆的焦点坐标与离心率：\n将椭圆方程 $4x^2 + 5y^2 = 20$ 化为标准形式：\n$$\\frac{x^2}{5} + \\frac{y^2}{4} = 1$$\n则 $a^2 = 5, b^2 = 4$，故 $c^2 = a^2 - b^2 = 1$，即 $c=1$。\n因此，椭圆的焦点坐标为 $(\\pm1, 0)$，离心率为：\n$$e = \\frac{c}{a} = \\frac{1}{\\sqrt{5}} = \\frac{\\sqrt{5}}{5}$$\n\n(2) 抛物线方程：\n抛物线顶点在原点，焦点为 $(1,0)$ 或 $(-1,0)$。\n- 若焦点为 $(1,0)$，设抛物线方程为 $y^2 = 2px$，则 $\\frac{p}{2} = 1$，得 $p=2$，方程为 $y^2 = 4x$。\n- 若焦点为 $(-1,0)$，设抛物线方程为 $y^2 = -2px$，则 $\\frac{p}{2} = 1$，得 $p=2$，方程为 $y^2 = -4x$。\n\n综上，抛物线的方程为 $y^2 = \\pm4x$。"
+  },
+  {
+    "id": "ellipse_equation_from_focus_and_chord_midpoint_001",
+    "topic": "ellipse",
+    "difficulty": 2,
+    "subtopics": ["椭圆标准方程", "点差法应用", "弦中点与斜率关系"],
+    "source": "高考复习题",
+    "problem": "中心在原点，一焦点为 $F_1(0,5\\sqrt{2})$ 的椭圆被直线 $y=3x-2$ 截得的弦的中点横坐标是 $\\dfrac{1}{2}$，求此椭圆的方程。",
+    "solution": "设椭圆方程为 $\\dfrac{y^2}{a^2} + \\dfrac{x^2}{b^2} = 1$（$a>b>0$），由焦点 $F_1(0,5\\sqrt{2})$ 得 $c=5\\sqrt{2}$，故：\n$$a^2 - b^2 = c^2 = 50 \\quad \\text{①}$$\n设弦的两个端点为 $A(x_1,y_1), B(x_2,y_2)$，中点为 $(x_0,y_0)$，已知 $x_0=\\dfrac{1}{2}$，代入直线方程得 $y_0=3 \\cdot \\dfrac{1}{2} - 2 = -\\dfrac{1}{2}$。\n由点差法，两式相减：\n$$\\begin{cases} \\dfrac{y_1^2}{a^2} + \\dfrac{x_1^2}{b^2} = 1 \\\\ \\dfrac{y_2^2}{a^2} + \\dfrac{x_2^2}{b^2} = 1 \\end{cases} \\implies \\dfrac{y_1^2 - y_2^2}{a^2} = -\\dfrac{x_1^2 - x_2^2}{b^2}$$\n整理得：\n$$k_{AB} = \\dfrac{y_1 - y_2}{x_1 - x_2} = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{x_1 + x_2}{y_1 + y_2} = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{x_0}{y_0}$$\n已知 $k_{AB}=3$，代入 $x_0=\\dfrac{1}{2}, y_0=-\\dfrac{1}{2}$：\n$$3 = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{\\dfrac{1}{2}}{-\\dfrac{1}{2}} = \\dfrac{a^2}{b^2} \\implies a^2 = 3b^2 \\quad \\text{②}$$\n联立①②解得 $a^2=75, b^2=25$。\n因此，椭圆方程为：\n$$\\dfrac{y^2}{75} + \\dfrac{x^2}{25} = 1$$"
+},
+  {
+    "id": "ellipse_equation_with_perpendicular_chord_and_length_001",
+    "topic": "ellipse",
+    "difficulty": 2,
+    "subtopics": ["椭圆标准方程", "直线与椭圆相交", "韦达定理应用", "向量垂直条件", "弦长公式"],
+    "source": "高考复习题",
+    "problem": "已知椭圆的中心在坐标原点 $O$，焦点在坐标轴上，直线 $y=x+1$ 与椭圆交于 $P$ 和 $Q$，且 $OP \\perp OQ$，$|PQ|=\\dfrac{\\sqrt{10}}{2}$，求椭圆方程。",
+    "solution": "设椭圆方程为 $mx^2 + ny^2 = 1$（$m>0,n>0$），设 $P(x_1,y_1), Q(x_2,y_2)$。\n联立直线与椭圆方程：\n$$\\begin{cases} y = x + 1 \\\\ mx^2 + ny^2 = 1 \\end{cases}$$\n整理得：\n$$(m + n)x^2 + 2nx + n - 1 = 0$$\n由判别式 $\\Delta > 0$，得 $m + n - mn > 0$。\n由韦达定理：\n$$x_1 + x_2 = -\\dfrac{2n}{m + n}, \\quad x_1x_2 = \\dfrac{n - 1}{m + n}$$\n由 $OP \\perp OQ$，得 $\\overrightarrow{OP} \\cdot \\overrightarrow{OQ} = 0$，即 $x_1x_2 + y_1y_2 = 0$。\n因 $y_1 = x_1 + 1, y_2 = x_2 + 1$，代入得：\n$$x_1x_2 + (x_1 + 1)(x_2 + 1) = 0 \\implies 2x_1x_2 + (x_1 + x_2) + 1 = 0$$\n将韦达定理结果代入，化简得：\n$$2 \\cdot \\dfrac{n - 1}{m + n} - \\dfrac{2n}{m + n} + 1 = 0 \\implies m + n = 2 \\quad \\text{①}$$\n又由弦长公式 $|PQ| = \\sqrt{1 + k^2} \\cdot \\sqrt{(x_1 + x_2)^2 - 4x_1x_2}$，$k=1$，故：\n$$|PQ| = \\sqrt{2} \\cdot \\sqrt{\\left(-\\dfrac{2n}{m + n}\\right)^2 - 4 \\cdot \\dfrac{n - 1}{m + n}} = \\dfrac{\\sqrt{10}}{2}$$\n平方并化简：\n$$2 \\cdot \\dfrac{4(m + n - mn)}{(m + n)^2} = \\dfrac{10}{4} \\implies \\dfrac{4(m + n - mn)}{(m + n)^2} = \\dfrac{5}{4}$$\n将 $m + n = 2$ 代入，得：\n$$\\dfrac{4(2 - mn)}{4} = \\dfrac{5}{4} \\implies 2 - mn = \\dfrac{5}{4} \\implies mn = \\dfrac{3}{4} \\quad \\text{②}$$\n联立①②，解得：\n$$\\begin{cases} m = \\dfrac{1}{2} \\\\ n = \\dfrac{3}{2} \\end{cases} \\quad \\text{或} \\quad \\begin{cases} m = \\dfrac{3}{2} \\\\ n = \\dfrac{1}{2} \\end{cases}$$\n因此，椭圆方程为：\n$$\\dfrac{x^2}{2} + \\dfrac{3y^2}{2} = 1 \\quad \\text{或} \\quad \\dfrac{3x^2}{2} + \\dfrac{y^2}{2} = 1$$"
+},
+  {
+    "id": "ellipse_standard_equation_from_vertex_and_axis_ratio_001",
+    "topic": "ellipse",
+    "difficulty": 1,
+    "subtopics": ["椭圆标准方程", "椭圆顶点与轴长关系"],
+    "source": "基础练习题",
+    "problem": "椭圆的一个顶点为 $A(2,0)$，其长轴长是短轴长的 $2$ 倍，求椭圆的标准方程。",
+    "solution": "需分两种情况讨论：\n\n(1) 当 $A(2,0)$ 为长轴端点时：\n此时长轴在 $x$ 轴上，故 $a=2$。\n由题意，长轴长是短轴长的 $2$ 倍，即 $2a=2(2b) \\implies a=2b$，得 $b=1$。\n椭圆标准方程为：\n$$\\frac{x^2}{4} + \\frac{y^2}{1} = 1$$\n\n(2) 当 $A(2,0)$ 为短轴端点时：\n此时短轴在 $x$ 轴上，故 $b=2$。\n由题意，$a=2b=4$，长轴在 $y$ 轴上。\n椭圆标准方程为：\n$$\\frac{x^2}{4} + \\frac{y^2}{16} = 1$$\n\n综上，椭圆的标准方程为 $\\frac{x^2}{4} + y^2 = 1$ 或 $\\frac{x^2}{4} + \\frac{y^2}{16} = 1$。"
 }
+
 ]

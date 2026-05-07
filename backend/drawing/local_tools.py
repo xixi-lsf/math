@@ -54,10 +54,11 @@ def _fig_to_b64(fig: plt.Figure) -> str:
 创建图形和坐标轴
 """
 def _setup_axes(params: ProblemParams) -> tuple[plt.Figure, plt.Axes]:
+    from drawing.sandbox import _compute_viewport
     fig, ax = plt.subplots(figsize=(7, 6))
-    #设置 x/y 范围
-    ax.set_xlim(*params.plot_range_x)
-    ax.set_ylim(*params.plot_range_y)
+    vx_min, vx_max, vy_min, vy_max = _compute_viewport(params)
+    ax.set_xlim(vx_min, vx_max)
+    ax.set_ylim(vy_min, vy_max)
     #绘制黑色坐标轴
     ax.axhline(0, color="black", linewidth=0.8)
     ax.axvline(0, color="black", linewidth=0.8)
@@ -116,6 +117,16 @@ def _draw_lines(ax: plt.Axes, lines: list[LineParams], x_range: tuple) -> None:
             ax.plot(x_arr, y_arr, "b-", linewidth=1.5)
 
 
+def _strip_dollars(s: str) -> str:
+    """Remove surrounding $ or $$ from a LaTeX string."""
+    s = s.strip()
+    if s.startswith("$$") and s.endswith("$$"):
+        return s[2:-2].strip()
+    if s.startswith("$") and s.endswith("$") and len(s) >= 2:
+        return s[1:-1].strip()
+    return s
+
+
 def _get_display_equation(params: ProblemParams, fallback: str) -> str:
     return params.conic.display_equation_latex or fallback
 
@@ -143,20 +154,7 @@ def draw_ellipse(params: ProblemParams) -> str:
     """
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    if _CJK_AVAILABLE:
-        suffix = "（示意）" if (a_unknown or b_unknown) else ""
-        equation = _get_display_equation(
-            params,
-            f"\\frac{{x^2}}{{{_fmt(a**2)}}}+\\frac{{y^2}}{{{_fmt(b**2)}}}=1",
-        )
-        ax.set_title(f"椭圆 ${equation}${suffix}", fontsize=12)
-    else:
-        suffix = " (sketch)" if (a_unknown or b_unknown) else ""
-        equation = _get_display_equation(
-            params,
-            f"x^2/{_fmt(a**2)}+y^2/{_fmt(b**2)}=1",
-        )
-        ax.set_title(f"Ellipse ${equation}${suffix}", fontsize=12)
+    ax.set_title("椭圆" if _CJK_AVAILABLE else "Ellipse", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -191,20 +189,7 @@ def draw_hyperbola(params: ProblemParams) -> str:
 
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    if _CJK_AVAILABLE:
-        suffix = "（示意）" if (a_unknown or b_unknown) else ""
-        equation = _get_display_equation(
-            params,
-            f"\\frac{{x^2}}{{{_fmt(a**2)}}}-\\frac{{y^2}}{{{_fmt(b**2)}}}=1",
-        )
-        ax.set_title(f"双曲线 ${equation}${suffix}", fontsize=12)
-    else:
-        suffix = " (sketch)" if (a_unknown or b_unknown) else ""
-        equation = _get_display_equation(
-            params,
-            f"x^2/{_fmt(a**2)}-y^2/{_fmt(b**2)}=1",
-        )
-        ax.set_title(f"Hyperbola ${equation}${suffix}", fontsize=12)
+    ax.set_title("双曲线" if _CJK_AVAILABLE else "Hyperbola", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -249,14 +234,7 @@ def draw_parabola(params: ProblemParams) -> str:
 
     _draw_lines(ax, params.lines, params.plot_range_x)
     _draw_points(ax, params.key_points)
-    if _CJK_AVAILABLE:
-        suffix = "（示意）" if p_unknown else ""
-        equation = _get_display_equation(params, f"y^2={_fmt(2*p)}x")
-        ax.set_title(f"抛物线 ${equation}${suffix}", fontsize=12)
-    else:
-        suffix = " (sketch)" if p_unknown else ""
-        equation = _get_display_equation(params, f"y^2={_fmt(2*p)}x")
-        ax.set_title(f"Parabola ${equation}${suffix}", fontsize=12)
+    ax.set_title("抛物线" if _CJK_AVAILABLE else "Parabola", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -284,14 +262,7 @@ def draw_polar_conic(params: ProblemParams) -> str:
     )
     ax.plot(x[mask], y[mask], "k-", linewidth=2)
     _draw_points(ax, params.key_points)
-    if _CJK_AVAILABLE:
-        suffix = "（示意）" if (e_unknown or d_unknown) else ""
-        equation = _get_display_equation(params, f"e={e:.3g}")
-        ax.set_title(f"极坐标圆锥曲线 ${equation}${suffix}", fontsize=12)
-    else:
-        suffix = " (sketch)" if (e_unknown or d_unknown) else ""
-        equation = _get_display_equation(params, f"e={e:.3g}")
-        ax.set_title(f"Polar Conic ${equation}${suffix}", fontsize=12)
+    ax.set_title("极坐标圆锥曲线" if _CJK_AVAILABLE else "Polar Conic", fontsize=12)
     return _fig_to_b64(fig)
 
 
@@ -306,6 +277,14 @@ def try_local_draw(params: ProblemParams) -> str:
     Attempt to draw using local template functions.
     Returns base64 PNG on success, raises NotImplementedError if not supported.
     """
+    # If the displayed equation is symbolic (e.g. x²/a²+y²/b²=1), the curve
+    # parameters are the answer — fall through to the slow path so we never
+    # render numeric values that would leak the solution.
+    import re
+    eq = params.conic.display_equation_latex or ""
+    if re.search(r'(?<![a-zA-Z])[abpe](?![a-zA-Z0-9_])', eq):
+        raise NotImplementedError("symbolic equation — use slow path to avoid leaking answer")
+
     ct = params.conic.curve_type
     if ct == "ellipse":
         return draw_ellipse(params)

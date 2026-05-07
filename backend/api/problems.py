@@ -25,6 +25,8 @@ class GenerateRequest(BaseModel):
     difficulty: int = 3
     subtopics: list[str] = []
     llm_config: dict = {}
+    selected_knowledge_ids: list[str] = []
+    selected_problem_ids: list[str] = []
 
 
 class SolveRequest(BaseModel):
@@ -47,6 +49,8 @@ async def generate_stream(req: GenerateRequest):
         "difficulty": req.difficulty,
         "subtopics": req.subtopics,
         "llm_config": req.llm_config,
+        "selected_knowledge_ids": req.selected_knowledge_ids,
+        "selected_problem_ids": req.selected_problem_ids,
         "retrieved_knowledge": [],
         "latex_problem": None,
         "params": None,

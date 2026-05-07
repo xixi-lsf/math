@@ -50,7 +50,17 @@ def solve_and_validate_node(state: AgentState) -> dict:
             }
 
     system_prompt = """你是严格的高中数学解题专家。
-请尝试完整求解以下题目。
+请尝试完整求解以下题目。如果题目较复杂，只需给出关键步骤和结论，不需要展示每一行代数化简过程，控制总长度在2000字以内
+如果题目较复杂，优先给出关键步骤和最终各点坐标数值，
+    省略繁琐的中间代数化简，控制总长度在3000字以内。
+    特别重要：所有在题目中出现的点，如果可以求出坐标，
+    必须在解题过程末尾单独列出：
+    【关键点坐标汇总】
+    A = (x, y)
+    B = (x, y)
+    M = (x, y)
+    ...
+    这样绘图时可以直接读取。
 
 要求：
 1. 按步骤写出完整解题过程，使用 LaTeX 格式
@@ -70,11 +80,16 @@ def solve_and_validate_node(state: AgentState) -> dict:
             {"role": "user", "content": user_prompt},
         ],
         temperature=0,
-        max_tokens=2000,
+        max_tokens=5000,
     )
 
     solution_text = (response.choices[0].message.content or "").strip()
-    last_line = solution_text.split("\n")[-1].strip() if solution_text else ""
+    non_empty_lines = [l.strip() for l in solution_text.split("\n") if l.strip()]
+    last_line = non_empty_lines[-1] if non_empty_lines else ""
+    # INVALID may appear before a trailing summary block — scan all lines
+    invalid_line = next((l for l in non_empty_lines if l.startswith("INVALID")), None)
+    if invalid_line:
+        last_line = invalid_line
 
     q = state.get("step_queue")
     model = llm_config.get("model", "deepseek-chat")

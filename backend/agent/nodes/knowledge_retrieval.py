@@ -18,25 +18,25 @@ def knowledge_retrieval_node(state: AgentState) -> dict:
     difficulty = state["difficulty"]
     subtopics = state.get("subtopics", [])
     step_id = state.get("step_counter", 0)
+    selected_knowledge_ids: list[str] = state.get("selected_knowledge_ids", [])
 
     #查询字符串（eg.ellipse 解析几何 难度3 焦点 弦长）
-    #查询字符串会被向量化并与知识库中的文档进行相似度匹配。
     query = f"{topic} 解析几何 难度{difficulty} {' '.join(subtopics)}"
-    #store = get_store()
     store = get_store()
 
-    # 1. ChromaDB retrieval,调用 store.retrieve，执行向量相似度搜索,返回最多 6 个最相关的知识片段（
-    chunks = store.retrieve(query, topic, difficulty, n_results=6)
-    builtin_count = len(chunks)
+    # 1. ChromaDB retrieval — user knowledge (if selected) + builtin knowledge
+    chunks = store.retrieve(
+        query, topic, difficulty, n_results=6,
+        selected_knowledge_ids=selected_knowledge_ids,
+    )
 
-    # 2. Also search user documents 检索用户自定义文档
-    user_chunks = store.retrieve_user_docs(query, n_results=3)
-    user_count = len(user_chunks)
-    chunks = chunks + user_chunks
+    logger.info(
+        "[knowledge_retrieval] topic=%s difficulty=%s total=%s user_knowledge_selected=%s",
+        topic, difficulty, len(chunks), len(selected_knowledge_ids),
+    )
 
-    # 3. Tavily fallback if too few results若结果不足，触发 Tavily 网络搜索（备用）
+    # 2. Tavily fallback if too few results
     web_used = False
-    #前面两步总共得到的知识片段少于 3 条，则认为本地知识库覆盖面不足
     if len(chunks) < 3:
         try:
             from tavily import TavilyClient
@@ -65,20 +65,12 @@ def knowledge_retrieval_node(state: AgentState) -> dict:
         except Exception:
             pass
 
-    logger.info(
-        "[knowledge_retrieval] topic=%s difficulty=%s builtin=%s user_docs=%s total=%s web_used=%s",
-        topic,
-        difficulty,
-        builtin_count,
-        user_count,
-        len(chunks),
-        web_used,
-    )
-
     #构建推理步骤
     action = f"从知识库检索到 {len(chunks)} 条相关知识"
     if web_used:
         action += "（含联网补充）"
+    if selected_knowledge_ids:
+        action += f"（含 {len(selected_knowledge_ids)} 份用户知识文档）"
 
     step = ReasoningStep(
         step_id=step_id,

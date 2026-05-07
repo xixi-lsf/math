@@ -15,6 +15,10 @@ class AgentState(TypedDict):
     subtopics: list[str]
     llm_config: dict          # {base_url, api_key, model}
 
+    # ── User document selections (empty list = don't use user docs) ──
+    selected_knowledge_ids: list[str]  # doc_ids from user_knowledge collection
+    selected_problem_ids: list[str]    # doc_ids from user_problems collection
+
     # ── Intermediate（中间字段）──
     retrieved_knowledge: list[KnowledgeChunk]#知识检索节点找回的知识片段
     latex_problem: Optional[str]#生成的题目（LaTeX 格式）

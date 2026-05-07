@@ -110,6 +110,13 @@ class KnowledgeStore:
         self._examples = self._client.get_or_create_collection(
             name="example_problems", embedding_function=_EMBED_FN
         )
+        # Typed user collections
+        self._user_knowledge = self._client.get_or_create_collection(
+            name="user_knowledge", embedding_function=_EMBED_FN
+        )
+        self._user_problems = self._client.get_or_create_collection(
+            name="user_problems", embedding_function=_EMBED_FN
+        )
 
     # ── Ingestion ─────────────────────────────────────────────────────────────
 
@@ -232,12 +239,95 @@ class KnowledgeStore:
 
     #添加用户文档
     def add_user_document(self, doc_id: str, text: str, metadata: dict) -> None:
-        """Add a user-uploaded document chunk."""
+        """Add a user-uploaded document chunk (legacy collection)."""
         self._user_docs.add(
             ids=[doc_id],
             documents=[text],
             metadatas=[{**metadata, "source": "user_upload"}],
         )
+
+    def add_user_knowledge_chunk(self, chunk_id: str, text: str, metadata: dict) -> None:
+        """Add a chunk to the user_knowledge collection."""
+        self._user_knowledge.add(
+            ids=[chunk_id],
+            documents=[text],
+            metadatas=[{**metadata, "source": "user_knowledge"}],
+        )
+
+    def add_user_problem_chunk(self, chunk_id: str, text: str, metadata: dict) -> None:
+        """Add a chunk to the user_problems collection."""
+        self._user_problems.add(
+            ids=[chunk_id],
+            documents=[text],
+            metadatas=[{**metadata, "source": "user_problem"}],
+        )
+
+    def delete_user_knowledge_doc(self, doc_id: str) -> None:
+        """Delete all chunks of a doc from user_knowledge collection."""
+        try:
+            results = self._user_knowledge.get(where={"doc_id": {"$eq": doc_id}})
+            if results and results["ids"]:
+                self._user_knowledge.delete(ids=results["ids"])
+        except Exception:
+            pass
+
+    def delete_user_problem_doc(self, doc_id: str) -> None:
+        """Delete all chunks of a doc from user_problems collection."""
+        try:
+            results = self._user_problems.get(where={"doc_id": {"$eq": doc_id}})
+            if results and results["ids"]:
+                self._user_problems.delete(ids=results["ids"])
+        except Exception:
+            pass
+
+    def retrieve_user_knowledge(
+        self, query: str, selected_doc_ids: list[str], n_results: int = 4
+    ) -> list[KnowledgeChunk]:
+        """Retrieve from user_knowledge, filtered to selected doc_ids."""
+        try:
+            count = self._user_knowledge.count()
+            if count == 0:
+                return []
+            where = {"doc_id": {"$in": selected_doc_ids}} if selected_doc_ids else None
+            kwargs: dict = {"query_texts": [query], "n_results": min(n_results, count)}
+            if where:
+                kwargs["where"] = where
+            results = self._user_knowledge.query(**kwargs)
+            chunks = []
+            for i, cid in enumerate(results["ids"][0]):
+                meta = results["metadatas"][0][i]
+                chunks.append(KnowledgeChunk(
+                    id=cid,
+                    content=results["documents"][0][i],
+                    latex_formula=meta.get("latex_formula", ""),
+                    topic=meta.get("topic", ""),
+                    subtopic=meta.get("subtopic", ""),
+                    source="user_knowledge",
+                ))
+            return chunks
+        except Exception:
+            return []
+
+    def retrieve_user_problems(
+        self, query: str, selected_doc_ids: list[str], n_results: int = 3
+    ) -> list[str]:
+        """Retrieve example problems from user_problems, filtered to selected doc_ids."""
+        try:
+            count = self._user_problems.count()
+            if count == 0:
+                return []
+            where = {"doc_id": {"$in": selected_doc_ids}} if selected_doc_ids else None
+            kwargs: dict = {"query_texts": [query], "n_results": min(n_results, count)}
+            if where:
+                kwargs["where"] = where
+            results = self._user_problems.query(**kwargs)
+            return [
+                f"【用户例题】{doc}"
+                for doc in results["documents"][0]
+                if doc.strip()
+            ]
+        except Exception:
+            return []
 
     #缓存网络结果
     def add_web_result(self, chunk: KnowledgeChunk) -> None:
@@ -263,41 +353,77 @@ class KnowledgeStore:
         topic: str,
         difficulty: int,
         n_results: int = 6,
+        selected_knowledge_ids: list[str] | None = None,
     ) -> list[KnowledgeChunk]:
-        """Semantic search filtered by topic and difficulty."""
-        where = {
-            "$and": [
-                {"topic": {"$eq": topic}},
-                {"difficulty_min": {"$lte": difficulty}},
-                {"difficulty_max": {"$gte": difficulty}},
-            ]
-        }
-        try:
-            results = self._theorems.query(
-                query_texts=[query],
-                n_results=n_results,
-                where=where,
-            )
-        except Exception:
-            # Fallback: no filter (e.g. collection empty)
-            results = self._theorems.query(query_texts=[query], n_results=n_results)
+        """Semantic search: user knowledge docs first (if selected), then builtin knowledge."""
+        retrieved: list[KnowledgeChunk] = []
 
-        chunks: list[KnowledgeChunk] = []
-        for i, doc_id in enumerate(results["ids"][0]):
-            meta = results["metadatas"][0][i]
-            chunks.append(KnowledgeChunk(
-                id=doc_id,
-                content=results["documents"][0][i],
-                latex_formula=meta.get("latex_formula", ""),
-                topic=meta.get("topic", topic),
-                subtopic=meta.get("subtopic", ""),
-                difficulty_range=(
-                    meta.get("difficulty_min", 1),
-                    meta.get("difficulty_max", 5),
-                ),
-                source=meta.get("source", "builtin"),
-            ))
-        return chunks
+        # Step 1: user knowledge documents (only if caller provides selected ids)
+        if selected_knowledge_ids:
+            user_chunks = self.retrieve_user_knowledge(
+                query, selected_knowledge_ids, n_results=min(4, n_results)
+            )
+            retrieved.extend(user_chunks)
+
+        # Step 2: builtin knowledge to fill remaining slots
+        remaining = n_results - len(retrieved)
+        if remaining > 0:
+            where = {
+                "$and": [
+                    {"topic": {"$eq": topic}},
+                    {"difficulty_min": {"$lte": difficulty}},
+                    {"difficulty_max": {"$gte": difficulty}},
+                ]
+            }
+            try:
+                builtin_count = self._theorems.count()
+                if builtin_count > 0:
+                    results = self._theorems.query(
+                        query_texts=[query],
+                        n_results=min(remaining, builtin_count),
+                        where=where,
+                    )
+                    for i, doc_id in enumerate(results["ids"][0]):
+                        meta = results["metadatas"][0][i]
+                        retrieved.append(KnowledgeChunk(
+                            id=doc_id,
+                            content=results["documents"][0][i],
+                            latex_formula=meta.get("latex_formula", ""),
+                            topic=meta.get("topic", topic),
+                            subtopic=meta.get("subtopic", ""),
+                            difficulty_range=(
+                                meta.get("difficulty_min", 1),
+                                meta.get("difficulty_max", 5),
+                            ),
+                            source=meta.get("source", "builtin"),
+                        ))
+            except Exception:
+                # Fallback: no filter
+                try:
+                    builtin_count = self._theorems.count()
+                    if builtin_count > 0:
+                        results = self._theorems.query(
+                            query_texts=[query],
+                            n_results=min(remaining, builtin_count),
+                        )
+                        for i, doc_id in enumerate(results["ids"][0]):
+                            meta = results["metadatas"][0][i]
+                            retrieved.append(KnowledgeChunk(
+                                id=doc_id,
+                                content=results["documents"][0][i],
+                                latex_formula=meta.get("latex_formula", ""),
+                                topic=meta.get("topic", topic),
+                                subtopic=meta.get("subtopic", ""),
+                                difficulty_range=(
+                                    meta.get("difficulty_min", 1),
+                                    meta.get("difficulty_max", 5),
+                                ),
+                                source=meta.get("source", "builtin"),
+                            ))
+                except Exception:
+                    pass
+
+        return retrieved
 
     def retrieve_user_docs(self, query: str, n_results: int = 4) -> list[KnowledgeChunk]:
         """Search user-uploaded documents."""
@@ -405,6 +531,17 @@ class KnowledgeStore:
 
     def delete_user_doc(self, doc_id: str) -> None:
         self._user_docs.delete(ids=[doc_id])
+
+    def delete_user_document(self, doc_id: str) -> None:
+        """Delete all chunks belonging to a doc_id from user_documents collection."""
+        try:
+            results = self._user_docs.get(
+                where={"doc_id": {"$eq": doc_id}}
+            )
+            if results and results["ids"]:
+                self._user_docs.delete(ids=results["ids"])
+        except Exception:
+            pass
 
 
 # ── Singleton ─────────────────────────────────────────────────────────────────

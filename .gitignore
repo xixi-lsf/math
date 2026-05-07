@@ -1,0 +1,5 @@
+# User-uploaded document metadata (not for version control)
+backend/knowledge/user_doc_meta.json
+backend/knowledge/user_knowledge_meta.json
+backend/knowledge/user_problems_meta.json
+.claude/

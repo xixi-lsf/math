@@ -7,7 +7,14 @@ interface UseSSEStreamResult {
   problem: ProblemResult | null
   isStreaming: boolean
   error: string | null
-  start: (topic: string, difficulty: number, subtopics: string[], config: LLMConfig) => void
+  start: (
+    topic: string,
+    difficulty: number,
+    subtopics: string[],
+    config: LLMConfig,
+    selectedKnowledgeIds?: string[],
+    selectedProblemIds?: string[],
+  ) => void
   reset: () => void
 }
 
@@ -27,7 +34,14 @@ export function useSSEStream(): UseSSEStreamResult {
   }, [])
 
   const start = useCallback(
-    async (topic: string, difficulty: number, subtopics: string[], config: LLMConfig) => {
+    async (
+      topic: string,
+      difficulty: number,
+      subtopics: string[],
+      config: LLMConfig,
+      selectedKnowledgeIds: string[] = [],
+      selectedProblemIds: string[] = [],
+    ) => {
       reset()
       setIsStreaming(true)
 
@@ -38,7 +52,14 @@ export function useSSEStream(): UseSSEStreamResult {
         const response = await fetch('/api/v1/problems/generate/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, difficulty, subtopics, llm_config: config }),
+          body: JSON.stringify({
+            topic,
+            difficulty,
+            subtopics,
+            llm_config: config,
+            selected_knowledge_ids: selectedKnowledgeIds,
+            selected_problem_ids: selectedProblemIds,
+          }),
           signal: controller.signal,
         })
 

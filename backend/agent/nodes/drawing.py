@@ -65,10 +65,22 @@ def drawing_node(state: AgentState) -> dict:
 
     # ── Slow path: LLM generates drawing code ────────────────────────────────
     if drawing_retry >= _MAX_DRAWING_RETRIES:
+        topic = state.get("topic", "ellipse")
+        difficulty = state.get("difficulty", 3)
+        from knowledge.vectordb import get_store
+        fallback = get_store().get_fallback_problem(topic, difficulty)
+        if fallback and fallback.get("image_base64"):
+            # Use pre-stored image from problem bank
+            image_b64 = fallback["image_base64"]
+            action_msg = f"绘图失败：已重试 {drawing_retry} 次，使用题库预存配图"
+        else:
+            # No pre-stored image, use placeholder
+            image_b64 = _placeholder_image(params)
+            action_msg = f"绘图失败：已重试 {drawing_retry} 次，使用占位图"
         step = ReasoningStep(
             step_id=step_id,
             node_name="drawing",
-            action=f"绘图失败：已重试 {drawing_retry} 次，使用占位图",
+            action=action_msg,
             tool_called="sandbox",
             tool_output_summary="max retries exceeded",
             drawing_path="slow",
@@ -78,7 +90,7 @@ def drawing_node(state: AgentState) -> dict:
             q.put_nowait(step)
         log_step(step)
         return {
-            "image_base64": _placeholder_image(params),
+            "image_base64": image_b64,
             "drawing_path": "slow",
             "drawing_error": None,
             "reasoning_trace": state.get("reasoning_trace", []) + [step],

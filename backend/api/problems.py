@@ -178,6 +178,11 @@ async def solve_problem(problem_id: str):
     if getattr(problem, "solution", None) is not None:
         return {"solution": problem.solution}
 
+    # Fallback problems already have a solution from the problem bank — skip LLM
+    if getattr(problem, "is_fallback", False):
+        solution = getattr(problem, "solution_latex", "") or ""
+        return {"solution": solution}
+
     state = {
         "topic": problem.params.topic if problem.params else "ellipse",
         "difficulty": problem.params.difficulty if problem.params else 3,

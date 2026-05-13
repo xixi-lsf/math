@@ -117,8 +117,28 @@ class KnowledgeStore:
         self._user_problems = self._client.get_or_create_collection(
             name="user_problems", embedding_function=_EMBED_FN
         )
+        # In-memory image cache: key=problem_id, value=image_base64 string
+        # Populated by scanning pictures/ directory at startup
+        self._example_images: dict[str, str] = {}
+        self._load_example_images()
 
     # ── Ingestion ─────────────────────────────────────────────────────────────
+
+    def _load_example_images(self) -> None:
+        """扫描 pictures/ 目录，把 {id}.png 读成 base64 存入内存。"""
+        pictures_dir = _BUILTIN_DIR / "problems" / "pictures"
+        if not pictures_dir.exists():
+            return
+        import base64
+        for png_file in pictures_dir.glob("*.png"):
+            problem_id = png_file.stem
+            try:
+                self._example_images[problem_id] = base64.b64encode(
+                    png_file.read_bytes()
+                ).decode("ascii")
+            except Exception:
+                pass
+        print(f"[KnowledgeStore] 加载例题配图 {len(self._example_images)} 张")
 
     #内置知识加载
     #self 指向 KnowledgeStore 对象
@@ -482,39 +502,69 @@ class KnowledgeStore:
 
     def get_fallback_problem(self, topic: str, difficulty: int) -> dict | None:
         """
-        从题库中取一道最匹配的题目作为保底。
-        返回完整的题目dict（含problem和solution），找不到返回None。
+        从题库中取一道保底题。
+        优先选同主题、同难度且有配图的题目；
+        没有则扩大难度范围找有配图的；
+        全都没有配图时才退而求其次返回无图题目。
         """
         try:
-            count = self._examples.count()
-            if count == 0:
+            if self._examples.count() == 0:
                 return None
 
-            # 难度范围逐步放宽：先精确匹配，再放宽±1，再放宽±2
-            for delta in [0, 1, 2]:
-                results = self._examples.query(
-                    query_texts=[topic],
-                    n_results=1,
-                    where={
-                        "$and": [
-                            {"topic": {"$eq": topic}},
-                            {"difficulty": {"$gte": difficulty - delta}},
-                            {"difficulty": {"$lte": difficulty + delta}},
-                        ]
-                    } if delta < 2 else {"topic": {"$eq": topic}},
-                )
-                if results and results["ids"][0]:
-                    doc = results["documents"][0][0]
-                    meta = results["metadatas"][0][0]
-                    if meta.get("source") == "hash_marker":
-                        continue
-                    return {
-                        "problem": doc,
-                        "solution": meta.get("solution", ""),
-                        "source": meta.get("source", "题库"),
-                        "is_fallback": True,
-                    }
-            return None
+            # 拉取该主题下所有题目
+            all_results = self._examples.get(
+                where={"topic": {"$eq": topic}},
+            )
+            if not all_results or not all_results["ids"]:
+                return None
+
+            # 过滤掉 hash_marker
+            candidates = [
+                {
+                    "id": all_results["ids"][i],
+                    "doc": all_results["documents"][i],
+                    "meta": all_results["metadatas"][i],
+                }
+                for i in range(len(all_results["ids"]))
+                if all_results["metadatas"][i].get("source") != "hash_marker"
+            ]
+            if not candidates:
+                return None
+
+            def _make_result(c: dict) -> dict:
+                return {
+                    "problem": c["doc"],
+                    "solution": c["meta"].get("solution", ""),
+                    "source": c["meta"].get("source", "题库"),
+                    "is_fallback": True,
+                    "image_base64": self._example_images.get(c["id"], ""),
+                }
+
+            # 1. 同难度 + 有图
+            for c in candidates:
+                if c["meta"].get("difficulty") == difficulty and c["id"] in self._example_images:
+                    return _make_result(c)
+
+            # 2. 扩大难度范围（±1, ±2）+ 有图
+            for delta in [1, 2, 3, 4]:
+                for c in candidates:
+                    diff = c["meta"].get("difficulty", 0)
+                    if abs(diff - difficulty) <= delta and c["id"] in self._example_images:
+                        return _make_result(c)
+
+            # 3. 任意有图（同主题）
+            for c in candidates:
+                if c["id"] in self._example_images:
+                    return _make_result(c)
+
+            # 4. 无图兜底：同难度
+            for c in candidates:
+                if c["meta"].get("difficulty") == difficulty:
+                    return _make_result(c)
+
+            # 5. 无图兜底：任意同主题
+            return _make_result(candidates[0])
+
         except Exception:
             return None
 

@@ -3,7 +3,12 @@
     "id": "ellipse_hard_001",
     "topic": "ellipse",
     "difficulty": 5,
-    "subtopics": ["focal_chord", "tangent", "parametric", "distance"],
+    "subtopics": [
+      "focal_chord",
+      "tangent",
+      "parametric",
+      "distance"
+    ],
     "source": "2025全国一卷高考真题",
     "problem": "已知椭圆 $C:\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$（$a>b>0$）的离心率为 $\\dfrac{2\\sqrt{2}}{3}$，下顶点为 $A$，右顶点为 $B$，$|AB|=\\sqrt{10}$。\n\n（1）求椭圆 $C$ 的方程；\n\n（2）已知动点 $P$ 不在 $y$ 轴上，点 $R$ 在射线 $AP$ 上，且满足 $|AP|\\cdot|AR|=3$。\n\n（i）设 $P(m,n)$，求 $R$ 的坐标（用 $m,n$ 表示）；\n\n（ii）设 $O$ 为坐标原点，$Q$ 是椭圆 $C$ 上的动点，直线 $OR$ 的斜率是直线 $OP$ 的斜率的 $3$ 倍，求 $|PQ|$ 的最大值。",
     "solution": "（1）设 $A(0,-b)$，$B(a,0)$，由 $|AB|=\\sqrt{10}$ 得 $a^2+b^2=10$。\n\n由离心率 $\\dfrac{c}{a}=\\dfrac{2\\sqrt{2}}{3}$，又 $a^2=b^2+c^2$，联立解得 $a=3,\\ b=1$。\n\n$$\\therefore \\text{椭圆标准方程为}\\quad \\frac{x^2}{9}+y^2=1$$\n\n（2）（i）$A(0,-1)$，$P(m,n)$，$R$ 在射线 $AP$ 上且 $|AP|\\cdot|AR|=3$。\n\n设 $\\overrightarrow{AR}=\\lambda\\overrightarrow{AP}$（$\\lambda>0$），则 $(x_R, y_R+1)=\\lambda(m,n+1)$，即 $x_R=\\lambda m,\\ y_R=\\lambda(n+1)-1$。\n\n由 $|AR|\\cdot|AP|=3$，得 $\\lambda|AP|^2=3$，故 $\\lambda=\\dfrac{3}{m^2+(n+1)^2}$，代入得：\n\n$$R\\left(\\frac{3m}{m^2+(n+1)^2},\\ \\frac{3(n+1)}{m^2+(n+1)^2}-1\\right)$$\n\n（ii）由直线 $OR$ 斜率是直线 $OP$ 斜率的 $3$ 倍，即 $\\dfrac{y_R}{x_R}=3\\cdot\\dfrac{n}{m}$，代入（i）结果化简得：\n\n$$m^2+(n+4)^2=18 \\quad (m\\neq 0)$$\n\n即点 $P$ 在以 $D(0,-4)$ 为圆心、$3\\sqrt{2}$ 为半径的圆上。\n\n$$|MD|=\\sqrt{x_0^2+(y_0+4)^2}=\\sqrt{-8y_0^2+8y_0+25}=\\sqrt{-8\\left(y_0-\\frac{1}{2}\\right)^2+27}\\leq 3\\sqrt{3}$$\n\n当 $y_0=\\dfrac{1}{2}$ 时取等，故 $|PQ|_{\\max}=3\\sqrt{3}+3\\sqrt{2}$。"
@@ -12,16 +17,25 @@
     "id": "ellipse_hard_002",
     "topic": "ellipse",
     "difficulty": 3,
-    "subtopics": ["standard_equation", "line_intersection", "area", "chord_length"],
+    "subtopics": [
+      "standard_equation",
+      "line_intersection",
+      "area",
+      "chord_length"
+    ],
     "source": "2025全国二卷高考真题",
     "problem": "已知椭圆 $C:\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$（$a>b>0$）的离心率为 $\\dfrac{\\sqrt{2}}{2}$，长轴长为 $4$。\n\n（1）求椭圆 $C$ 的方程；\n\n（2）过点 $(0,-2)$ 的直线 $l$ 与 $C$ 交于 $A,B$ 两点，$O$ 为坐标原点，若 $\\triangle OAB$ 的面积为 $\\sqrt{2}$，求 $|AB|$。",
     "solution": "（1）由题意得方程组：\n$$\n\\begin{cases}\n\\dfrac{c}{a}=\\dfrac{\\sqrt{2}}{2} \\\\\n2a=4 \\\\\nb^2=a^2-c^2\n\\end{cases}\n$$\n解得 $a=2,\\ c=\\sqrt{2},\\ b=\\sqrt{2}$。\n\n$$\\therefore \\text{椭圆}C\\text{的方程为}\\quad \\frac{x^2}{4}+\\frac{y^2}{2}=1$$\n\n（2）由题意知，直线 $l$ 的斜率存在，设 $l:y=kx-2$。\n联立方程：\n$$\n\\begin{cases}\ny=kx-2 \\\\\n\\dfrac{x^2}{4}+\\dfrac{y^2}{2}=1\n\\end{cases}\n$$\n整理得 $(1+2k^2)x^2-8kx+4=0$。\n\n设 $A(x_1,y_1),\\ B(x_2,y_2)$，则由韦达定理：\n$$\nx_1+x_2=\\dfrac{8k}{1+2k^2},\\quad x_1x_2=\\dfrac{4}{1+2k^2}\n$$\n\n弦长 $|AB|=\\sqrt{1+k^2}|x_1-x_2|$，原点 $O$ 到直线 $AB$ 的距离 $d=\\dfrac{2}{\\sqrt{1+k^2}}$。\n\n由 $S_{\\triangle OAB}=\\dfrac{1}{2}\\cdot|AB|\\cdot d=\\sqrt{2}$，代入得：\n$$\n\\dfrac{1}{2}\\cdot\\sqrt{1+k^2}|x_1-x_2|\\cdot\\dfrac{2}{\\sqrt{1+k^2}}=\\sqrt{2}\n$$\n化简得 $|x_1-x_2|=\\sqrt{2}$。\n\n由 $|x_1-x_2|=\\sqrt{(x_1+x_2)^2-4x_1x_2}$，代入得：\n$$\n\\left(\\dfrac{8k}{1+2k^2}\\right)^2-\\dfrac{16}{1+2k^2}=2\n$$\n解得 $k^2=\\dfrac{3}{2}$，代入判别式 $\\Delta>0$ 验证成立。\n\n再将 $k^2=\\dfrac{3}{2}$ 代入面积公式：\n$$\n\\dfrac{1}{2}\\cdot|AB|\\cdot\\dfrac{2}{\\sqrt{1+k^2}}=\\sqrt{2}\n$$\n解得：\n$$\n|AB|=\\sqrt{5}\n$$"
   },
   {
-    "id": "ellipse_hard_002",
+    "id": "ellipse_hard_003",
     "topic": "ellipse",
     "difficulty": 4,
-    "subtopics": ["standard_equation", "line_intersection", "triangle_area"],
+    "subtopics": [
+      "standard_equation",
+      "line_intersection",
+      "triangle_area"
+    ],
     "source": "2025天津高考真题",
     "problem": "已知椭圆 $E:\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$ 的离心率为 $\\dfrac{\\sqrt{2}}{2}$，椭圆上的点到两个焦点的距离之和为 $4$。\n\n（1）求椭圆方程；\n\n（2）设 $O$ 为原点，$M(x_0,y_0)(x_0 \\neq 0)$ 为椭圆上一点，直线 $x_0x + 2y_0y - 4 = 0$ 与 $y=2$ 和 $y=-2$ 分别相交于 $A$、$B$ 两点，设 $\\triangle OMA$ 和 $\\triangle OMB$ 的面积分别为 $S_1$ 和 $S_2$，比较 $\\dfrac{S_1}{S_2}$ 和 $\\dfrac{|OA|}{|OB|}$ 的大小。",
     "solution": "（1）由题意得方程组：\n$$\n\\begin{cases}\n\\dfrac{c}{a}=\\dfrac{\\sqrt{2}}{2} \\\\\n2a=4 \\\\\nb^2=a^2-c^2\n\\end{cases}\n$$\n解得 $a=2,\\ c=\\sqrt{2},\\ b=\\sqrt{2}$。\n\n$$\\therefore \\text{椭圆方程为}\\quad \\frac{x^2}{4}+\\frac{y^2}{2}=1$$\n\n（2）由直线 $x_0x + 2y_0y - 4 = 0$ 与 $y=2$、$y=-2$ 分别相交，可得：\n$$\nA\\left(\\frac{4-4y_0}{x_0},2\\right),\\quad B\\left(\\frac{4+4y_0}{x_0},-2\\right)\n$$\n\n设 $\\angle AOM=\\alpha,\\ \\angle BOM=\\beta$，利用夹角公式：\n$$\n\\tan\\alpha=\\frac{k_{OA}-k_{OM}}{1+k_{OA}k_{OM}}=\\frac{2}{x_0},\\quad \\tan\\beta=\\frac{k_{OM}-k_{OB}}{1+k_{OM}k_{OB}}=\\frac{2}{x_0}\n$$\n\n因此 $\\tan\\alpha=\\tan\\beta$，故 $\\alpha=\\beta$，$\\sin\\alpha=\\sin\\beta$。\n\n三角形面积公式：\n$$\nS_1=\\frac{1}{2}|OA|\\cdot|OM|\\sin\\alpha,\\quad S_2=\\frac{1}{2}|OB|\\cdot|OM|\\sin\\beta\n$$\n\n两式相比得：\n$$\n\\frac{S_1}{S_2}=\\frac{|OA|}{|OB|}\n$$\n\n即两者大小相等。"
@@ -30,7 +44,12 @@
     "id": "ellipse_hard_003",
     "topic": "ellipse",
     "difficulty": 4,
-    "subtopics": ["standard_equation", "tangent", "angle_bisector", "cosine_law"],
+    "subtopics": [
+      "standard_equation",
+      "tangent",
+      "angle_bisector",
+      "cosine_law"
+    ],
     "source": "2025天津卷高考真题",
     "problem": "已知椭圆 $\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1(a>b>0)$ 的左焦点为 $F$，右顶点为 $A$，$P$ 为 $x=a$ 上一点，且直线 $PF$ 的斜率为 $\\dfrac{1}{3}$，$\\triangle PFA$ 的面积为 $\\dfrac{3}{2}$，离心率为 $\\dfrac{1}{2}$。\n\n（I）求椭圆的方程；\n\n（II）过点 $P$ 的直线与椭圆有唯一交点 $B$（异于点 $A$），求证：$PF$ 平分 $\\angle AFB$。",
     "solution": "（I）求椭圆方程：\n设椭圆半焦距为 $c$，则离心率 $e=\\dfrac{c}{a}=\\dfrac{1}{2}$，故 $a=2c$。\n\n由 $A(a,0)$，$F(-c,0)$，$P$ 在 $x=a$ 上，设 $P(a,y_P)$。\n直线 $PF$ 的斜率为 $\\dfrac{y_P-0}{a-(-c)}=\\dfrac{y_P}{3c}=\\dfrac{1}{3}$，故 $y_P=c$，即 $P(a,c)$。\n\n$\\triangle PFA$ 的面积为：\n$$\nS_{\\triangle PFA} = \\dfrac{1}{2} \\times |AF| \\times y_P = \\dfrac{1}{2} \\times (a+c) \\times c = \\dfrac{3}{2}\n$$\n代入 $a=2c$：\n$$\n\\dfrac{1}{2} \\times 3c \\times c = \\dfrac{3}{2} \\implies c^2=1 \\implies c=1\n$$\n\n因此 $a=2$，$b^2=a^2-c^2=3$，椭圆方程为：\n$$\n\\dfrac{x^2}{4} + \\dfrac{y^2}{3} = 1\n$$\n此时 $A(2,0)$，$F(-1,0)$，$P(2,1)$。\n\n（II）证明 $PF$ 平分 $\\angle AFB$：\n设椭圆在点 $B(x_0,y_0)$ 处的切线方程为：\n$$\n\\dfrac{x_0x}{4} + \\dfrac{y_0y}{3} = 1\n$$\n切线过点 $P(2,1)$，代入得：\n$$\n\\dfrac{2x_0}{4} + \\dfrac{y_0}{3} = 1 \\implies \\dfrac{x_0}{2} + \\dfrac{y_0}{3} = 1 \\implies y_0 = -\\dfrac{3}{2}x_0 + 3\n$$\n\n点 $B(x_0,y_0)$ 在椭圆上，故 $\\dfrac{x_0^2}{4} + \\dfrac{y_0^2}{3} = 1$，代入 $y_0$ 得：\n$$\n\\dfrac{x_0^2}{4} + \\dfrac{\\left(-\\dfrac{3}{2}x_0 + 3\\right)^2}{3} = 1\n$$\n化简得：\n$$\nx_0^2 - 3x_0 + 2 = 0 \\implies x_0=1 \\text{ 或 } x_0=2(\\text{舍去，异于点}A)\n$$\n\n当 $x_0=1$ 时，$y_0 = -\\dfrac{3}{2} \\times 1 + 3 = \\dfrac{3}{2}$，故 $B\\left(1,\\dfrac{3}{2}\\right)$。\n\n计算相关线段长度：\n$$\n|BF| = \\sqrt{(1+1)^2 + \\left(\\dfrac{3}{2}-0\\right)^2} = \\dfrac{5}{2}\n$$\n$$\n|AF| = 2 - (-1) = 3\n$$\n$$\n|PF| = \\sqrt{(2+1)^2 + (1-0)^2} = \\sqrt{10}\n$$\n$$\n|BP| = \\sqrt{(1-2)^2 + \\left(\\dfrac{3}{2}-1\\right)^2} = \\dfrac{\\sqrt{5}}{2}\n$$\n$$\n|AP| = 1 - 0 = 1\n$$\n\n由余弦定理计算夹角余弦值：\n$$\n\\cos\\angle BFP = \\dfrac{|BF|^2 + |PF|^2 - |BP|^2}{2|BF|\\cdot|PF|} = \\dfrac{\\left(\\dfrac{5}{2}\\right)^2 + (\\sqrt{10})^2 - \\left(\\dfrac{\\sqrt{5}}{2}\\right)^2}{2 \\times \\dfrac{5}{2} \\times \\sqrt{10}} = \\dfrac{3\\sqrt{10}}{10}\n$$\n$$\n\\cos\\angle AFP = \\dfrac{|AF|^2 + |PF|^2 - |AP|^2}{2|AF|\\cdot|PF|} = \\dfrac{3^2 + (\\sqrt{10})^2 - 1^2}{2 \\times 3 \\times \\sqrt{10}} = \\dfrac{3\\sqrt{10}}{10}\n$$\n\n因此 $\\cos\\angle BFP = \\cos\\angle AFP$，且两角均为三角形内角，故 $\\angle BFP = \\angle AFP$，即 $PF$ 平分 $\\angle AFB$。"
@@ -39,7 +58,12 @@
     "id": "ellipse_area_line_001",
     "topic": "ellipse",
     "difficulty": 3,
-    "subtopics": ["standard_equation", "eccentricity", "line_intersection", "triangle_area"],
+    "subtopics": [
+      "standard_equation",
+      "eccentricity",
+      "line_intersection",
+      "triangle_area"
+    ],
     "source": "2024新课标高考一卷真题",
     "problem": "已知 $A(0,3)$ 和 $P\\left(3,\\dfrac{3}{2}\\right)$ 为椭圆 $C:\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1(a>b>0)$ 上两点。\n\n（1）求 $C$ 的离心率；\n\n（2）若过 $P$ 的直线 $l$ 交 $C$ 于另一点 $B$，且 $\\triangle ABP$ 的面积为 $9$，求 $l$ 的方程。",
     "solution": "（1）求椭圆的离心率：\n点 $A(0,3)$ 在椭圆上，代入方程得：\n$$\n\\dfrac{0^2}{a^2} + \\dfrac{3^2}{b^2} = 1 \\implies b^2 = 9\n$$\n\n点 $P\\left(3,\\dfrac{3}{2}\\right)$ 在椭圆上，代入方程得：\n$$\n\\dfrac{3^2}{a^2} + \\dfrac{\\left(\\dfrac{3}{2}\\right)^2}{9} = 1 \\implies \\dfrac{9}{a^2} + \\dfrac{1}{4} = 1 \\implies \\dfrac{9}{a^2} = \\dfrac{3}{4} \\implies a^2 = 12\n$$\n\n由 $c^2 = a^2 - b^2 = 12 - 9 = 3$，得 $c = \\sqrt{3}$，\n\n因此离心率：\n$$\ne = \\dfrac{c}{a} = \\dfrac{\\sqrt{3}}{2\\sqrt{3}} = \\dfrac{1}{2}\n$$\n\n（2）求直线 $l$ 的方程：\n首先计算线段 $AP$ 的长度：\n$$\n|AP| = \\sqrt{(3-0)^2 + \\left(\\dfrac{3}{2}-3\\right)^2} = \\sqrt{9 + \\dfrac{9}{4}} = \\dfrac{3\\sqrt{5}}{2}\n$$\n\n由 $S_{\\triangle ABP} = \\dfrac{1}{2} \\cdot |AP| \\cdot h = 9$，得点 $B$ 到直线 $AP$ 的距离：\n$$\nh = \\dfrac{2 \\times 9}{\\dfrac{3\\sqrt{5}}{2}} = \\dfrac{12}{\\sqrt{5}}\n$$\n\n直线 $AP$ 的方程为 $x + 2y - 6 = 0$。设过点 $B$ 且与 $AP$ 平行的直线为 $x + 2y + C = 0$，则两平行线间的距离：\n$$\n\\dfrac{|C + 6|}{\\sqrt{1^2 + 2^2}} = \\dfrac{12}{\\sqrt{5}} \\implies |C + 6| = 12\n$$\n解得 $C = 6$ 或 $C = -18$。\n\n当 $C = -18$ 时，直线 $x + 2y - 18 = 0$ 与椭圆相离，舍去。\n\n当 $C = 6$ 时，直线 $x + 2y + 6 = 0$ 与椭圆的交点为 $A$、$P$ 关于原点的对称点：\n$$\nB_1(0,-3),\\ B_2\\left(-3,-\\dfrac{3}{2}\\right)\n$$\n\n分别求直线 $PB_1$ 和 $PB_2$ 的方程：\n- 过 $P\\left(3,\\dfrac{3}{2}\\right)$ 和 $B_1(0,-3)$：斜率 $k = \\dfrac{\\dfrac{3}{2} + 3}{3 - 0} = \\dfrac{3}{2}$，方程为 $y = \\dfrac{3}{2}x - 3$。\n- 过 $P\\left(3,\\dfrac{3}{2}\\right)$ 和 $B_2\\left(-3,-\\dfrac{3}{2}\\right)$：斜率 $k = \\dfrac{\\dfrac{3}{2} + \\dfrac{3}{2}}{3 + 3} = \\dfrac{1}{2}$，方程为 $y = \\dfrac{1}{2}x$。\n\n因此，直线 $l$ 的方程为：\n$$\ny = \\dfrac{1}{2}x \\quad \\text{或} \\quad y = \\dfrac{3}{2}x - 3\n$$"
@@ -48,7 +72,12 @@
     "id": "ellipse_line_intersection_001",
     "topic": "ellipse",
     "difficulty": 4,
-    "subtopics": ["standard_equation", "eccentricity", "line_intersection", "slope_condition"],
+    "subtopics": [
+      "standard_equation",
+      "eccentricity",
+      "line_intersection",
+      "slope_condition"
+    ],
     "source": "高考模拟题",
     "problem": "已知椭圆方程 $C:\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1(a>b>0)$，焦点和短轴端点构成边长为2的正方形，过 $(0,t)(t>\\sqrt{2})$ 的直线 $l$ 与椭圆交于 $A,B$，点 $C(0,1)$，连接 $AC$ 交椭圆于 $D$。\n\n（1）求椭圆方程和离心率；\n\n（2）若直线 $BD$ 的斜率为 $0$，求 $t$。",
     "solution": "（1）求椭圆方程和离心率：\n由焦点和短轴端点构成边长为2的正方形，可知 $b=c=\\sqrt{2}$，\n根据椭圆关系 $a^2 = b^2 + c^2$，得 $a^2 = 2 + 2 = 4$，即 $a=2$。\n\n因此椭圆方程为：\n$$\n\\dfrac{x^2}{4} + \\dfrac{y^2}{2} = 1\n$$\n离心率：\n$$\ne = \\dfrac{c}{a} = \\dfrac{\\sqrt{2}}{2} = \\dfrac{\\sqrt{3}}{2}\n$$\n\n（2）求 $t$：\n设过 $(0,t)$ 的直线 $l$ 方程为 $y = kx + t$，与椭圆方程联立：\n$$\n\\begin{cases}\ny = kx + t \\\\\nx^2 + 2y^2 = 4\n\\end{cases}\n$$\n整理得：\n$$\n(2k^2 + 1)x^2 + 4ktx + 2t^2 - 4 = 0\n$$\n\n设 $A(x_1,y_1), B(x_2,y_2)$，由韦达定理：\n$$\nx_1 + x_2 = -\\dfrac{4kt}{2k^2 + 1},\\quad x_1x_2 = \\dfrac{2t^2 - 4}{2k^2 + 1}\n$$\n\n由直线 $BD$ 斜率为 $0$，可知 $D(-x_2, y_2)$。\n\n直线 $AD$ 的方程为：\n$$\ny = \\dfrac{y_1 - y_2}{x_1 + x_2}(x - x_1) + y_1\n$$\n点 $C(0,1)$ 在直线 $AD$ 上，故：\n$$\ny_C = \\dfrac{x_1y_2 + x_2y_1}{x_1 + x_2} = 1\n$$\n\n将 $y_1 = kx_1 + t, y_2 = kx_2 + t$ 代入：\n$$\ny_C = \\dfrac{2kx_1x_2 + t(x_1 + x_2)}{x_1 + x_2} = \\dfrac{2k \\cdot \\dfrac{2t^2 - 4}{2k^2 + 1} + t \\cdot \\left(-\\dfrac{4kt}{2k^2 + 1}\\right)}{-\\dfrac{4kt}{2k^2 + 1}} = \\dfrac{4k(t^2 - 2) - 4kt^2}{-4kt} = \\dfrac{-8k}{-4kt} = \\dfrac{2}{t}\n$$\n\n由 $y_C = 1$，得：\n$$\n\\dfrac{2}{t} = 1 \\implies t = 2\n$$"
@@ -57,7 +86,11 @@
     "id": "ellipse_perpendicular_focal_chord_ratio_001",
     "topic": "ellipse",
     "difficulty": 3,
-    "subtopics": ["focal_chord", "perpendicularity", "ratio_calculation"],
+    "subtopics": [
+      "focal_chord",
+      "perpendicularity",
+      "ratio_calculation"
+    ],
     "source": "高考模拟题",
     "problem": "已知椭圆 $C: \\dfrac{x^2}{a^2} + \\dfrac{y^2}{b^2} = 1(a > b > 0)$ 的离心率为 $\\dfrac{\\sqrt{2}}{2}$，左、右焦点分别为 $F_1, F_2$，过 $F_2$ 的直线交 $C$ 于 $A, B$ 两点。若 $AF_1 \\perp AF_2$，求 $\\dfrac{|AF_2|}{|BF_2|} ",
     "solution": "设 $|AF_2| = t(t > 0)$，则由椭圆定义得 $|AF_1| = 2a - t$。\n\n椭圆的离心率 $e = \\dfrac{c}{a} = \\dfrac{\\sqrt{2}}{2}$，故 $a = \\sqrt{2}c$。\n\n由 $AF_1 \\perp AF_2$，根据勾股定理：\n$$\n|AF_1|^2 + |AF_2|^2 = |F_1F_2|^2\n$$\n即：\n$$\n(2a - t)^2 + t^2 = (2c)^2\n$$\n\n代入 $a = \\sqrt{2}c$：\n$$\n(2\\sqrt{2}c - t)^2 + t^2 = 4c^2\n$$\n\n解得 $t = \\sqrt{2}c$，故 $|AF_2| = \\sqrt{2}c$，$|AF_1| = 2a - t = \\sqrt{2}c$。\n\n在 $\\triangle ABF_1$ 中，$\\angle BAF_1 = 90^\\circ$，故：\n$$\n|AF_1|^2 + |AB|^2 = |BF_1|^2\n$$\n\n设 $|BF_2| = s$，则 $|AB| = t + s = \\sqrt{2}c + s$，$|BF_1| = 2a - s = 2\\sqrt{2}c - s$，代入得：\n$$\n(\\sqrt{2}c)^2 + (\\sqrt{2}c + s)^2 = (2\\sqrt{2}c - s)^2\n$$\n\n解得 $s = \\dfrac{\\sqrt{2}}{3}c$，即 $|BF_2| = \\dfrac{\\sqrt{2}}{3}c$。\n\n因此：\n$$\n\\dfrac{|AF_2|}{|BF_2|} = \\dfrac{\\sqrt{2}c}{\\dfrac{\\sqrt{2}}{3}c} = 3\n$$"
@@ -66,7 +99,10 @@
     "id": "ellipse_focus_parabola_equation_001",
     "topic": "ellipse",
     "difficulty": 1,
-    "subtopics": ["椭圆焦点与离心率", "抛物线方程"],
+    "subtopics": [
+      "椭圆焦点与离心率",
+      "抛物线方程"
+    ],
     "source": "基础练习题",
     "problem": "已知抛物线的顶点在原点，焦点与椭圆 $4x^2 + 5y^2 = 20$ 的一个焦点相同。\n\n(1) 求椭圆的焦点坐标与离心率；\n\n(2) 求抛物线方程。",
     "solution": "(1) 椭圆的焦点坐标与离心率：\n将椭圆方程 $4x^2 + 5y^2 = 20$ 化为标准形式：\n$$\\frac{x^2}{5} + \\frac{y^2}{4} = 1$$\n则 $a^2 = 5, b^2 = 4$，故 $c^2 = a^2 - b^2 = 1$，即 $c=1$。\n因此，椭圆的焦点坐标为 $(\\pm1, 0)$，离心率为：\n$$e = \\frac{c}{a} = \\frac{1}{\\sqrt{5}} = \\frac{\\sqrt{5}}{5}$$\n\n(2) 抛物线方程：\n抛物线顶点在原点，焦点为 $(1,0)$ 或 $(-1,0)$。\n- 若焦点为 $(1,0)$，设抛物线方程为 $y^2 = 2px$，则 $\\frac{p}{2} = 1$，得 $p=2$，方程为 $y^2 = 4x$。\n- 若焦点为 $(-1,0)$，设抛物线方程为 $y^2 = -2px$，则 $\\frac{p}{2} = 1$，得 $p=2$，方程为 $y^2 = -4x$。\n\n综上，抛物线的方程为 $y^2 = \\pm4x$。"
@@ -75,28 +111,40 @@
     "id": "ellipse_equation_from_focus_and_chord_midpoint_001",
     "topic": "ellipse",
     "difficulty": 2,
-    "subtopics": ["椭圆标准方程", "点差法应用", "弦中点与斜率关系"],
+    "subtopics": [
+      "椭圆标准方程",
+      "点差法应用",
+      "弦中点与斜率关系"
+    ],
     "source": "高考复习题",
     "problem": "中心在原点，一焦点为 $F_1(0,5\\sqrt{2})$ 的椭圆被直线 $y=3x-2$ 截得的弦的中点横坐标是 $\\dfrac{1}{2}$，求此椭圆的方程。",
     "solution": "设椭圆方程为 $\\dfrac{y^2}{a^2} + \\dfrac{x^2}{b^2} = 1$（$a>b>0$），由焦点 $F_1(0,5\\sqrt{2})$ 得 $c=5\\sqrt{2}$，故：\n$$a^2 - b^2 = c^2 = 50 \\quad \\text{①}$$\n设弦的两个端点为 $A(x_1,y_1), B(x_2,y_2)$，中点为 $(x_0,y_0)$，已知 $x_0=\\dfrac{1}{2}$，代入直线方程得 $y_0=3 \\cdot \\dfrac{1}{2} - 2 = -\\dfrac{1}{2}$。\n由点差法，两式相减：\n$$\\begin{cases} \\dfrac{y_1^2}{a^2} + \\dfrac{x_1^2}{b^2} = 1 \\\\ \\dfrac{y_2^2}{a^2} + \\dfrac{x_2^2}{b^2} = 1 \\end{cases} \\implies \\dfrac{y_1^2 - y_2^2}{a^2} = -\\dfrac{x_1^2 - x_2^2}{b^2}$$\n整理得：\n$$k_{AB} = \\dfrac{y_1 - y_2}{x_1 - x_2} = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{x_1 + x_2}{y_1 + y_2} = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{x_0}{y_0}$$\n已知 $k_{AB}=3$，代入 $x_0=\\dfrac{1}{2}, y_0=-\\dfrac{1}{2}$：\n$$3 = -\\dfrac{a^2}{b^2} \\cdot \\dfrac{\\dfrac{1}{2}}{-\\dfrac{1}{2}} = \\dfrac{a^2}{b^2} \\implies a^2 = 3b^2 \\quad \\text{②}$$\n联立①②解得 $a^2=75, b^2=25$。\n因此，椭圆方程为：\n$$\\dfrac{y^2}{75} + \\dfrac{x^2}{25} = 1$$"
-},
+  },
   {
     "id": "ellipse_equation_with_perpendicular_chord_and_length_001",
     "topic": "ellipse",
     "difficulty": 2,
-    "subtopics": ["椭圆标准方程", "直线与椭圆相交", "韦达定理应用", "向量垂直条件", "弦长公式"],
+    "subtopics": [
+      "椭圆标准方程",
+      "直线与椭圆相交",
+      "韦达定理应用",
+      "向量垂直条件",
+      "弦长公式"
+    ],
     "source": "高考复习题",
     "problem": "已知椭圆的中心在坐标原点 $O$，焦点在坐标轴上，直线 $y=x+1$ 与椭圆交于 $P$ 和 $Q$，且 $OP \\perp OQ$，$|PQ|=\\dfrac{\\sqrt{10}}{2}$，求椭圆方程。",
     "solution": "设椭圆方程为 $mx^2 + ny^2 = 1$（$m>0,n>0$），设 $P(x_1,y_1), Q(x_2,y_2)$。\n联立直线与椭圆方程：\n$$\\begin{cases} y = x + 1 \\\\ mx^2 + ny^2 = 1 \\end{cases}$$\n整理得：\n$$(m + n)x^2 + 2nx + n - 1 = 0$$\n由判别式 $\\Delta > 0$，得 $m + n - mn > 0$。\n由韦达定理：\n$$x_1 + x_2 = -\\dfrac{2n}{m + n}, \\quad x_1x_2 = \\dfrac{n - 1}{m + n}$$\n由 $OP \\perp OQ$，得 $\\overrightarrow{OP} \\cdot \\overrightarrow{OQ} = 0$，即 $x_1x_2 + y_1y_2 = 0$。\n因 $y_1 = x_1 + 1, y_2 = x_2 + 1$，代入得：\n$$x_1x_2 + (x_1 + 1)(x_2 + 1) = 0 \\implies 2x_1x_2 + (x_1 + x_2) + 1 = 0$$\n将韦达定理结果代入，化简得：\n$$2 \\cdot \\dfrac{n - 1}{m + n} - \\dfrac{2n}{m + n} + 1 = 0 \\implies m + n = 2 \\quad \\text{①}$$\n又由弦长公式 $|PQ| = \\sqrt{1 + k^2} \\cdot \\sqrt{(x_1 + x_2)^2 - 4x_1x_2}$，$k=1$，故：\n$$|PQ| = \\sqrt{2} \\cdot \\sqrt{\\left(-\\dfrac{2n}{m + n}\\right)^2 - 4 \\cdot \\dfrac{n - 1}{m + n}} = \\dfrac{\\sqrt{10}}{2}$$\n平方并化简：\n$$2 \\cdot \\dfrac{4(m + n - mn)}{(m + n)^2} = \\dfrac{10}{4} \\implies \\dfrac{4(m + n - mn)}{(m + n)^2} = \\dfrac{5}{4}$$\n将 $m + n = 2$ 代入，得：\n$$\\dfrac{4(2 - mn)}{4} = \\dfrac{5}{4} \\implies 2 - mn = \\dfrac{5}{4} \\implies mn = \\dfrac{3}{4} \\quad \\text{②}$$\n联立①②，解得：\n$$\\begin{cases} m = \\dfrac{1}{2} \\\\ n = \\dfrac{3}{2} \\end{cases} \\quad \\text{或} \\quad \\begin{cases} m = \\dfrac{3}{2} \\\\ n = \\dfrac{1}{2} \\end{cases}$$\n因此，椭圆方程为：\n$$\\dfrac{x^2}{2} + \\dfrac{3y^2}{2} = 1 \\quad \\text{或} \\quad \\dfrac{3x^2}{2} + \\dfrac{y^2}{2} = 1$$"
-},
+  },
   {
     "id": "ellipse_standard_equation_from_vertex_and_axis_ratio_001",
     "topic": "ellipse",
     "difficulty": 1,
-    "subtopics": ["椭圆标准方程", "椭圆顶点与轴长关系"],
+    "subtopics": [
+      "椭圆标准方程",
+      "椭圆顶点与轴长关系"
+    ],
     "source": "基础练习题",
     "problem": "椭圆的一个顶点为 $A(2,0)$，其长轴长是短轴长的 $2$ 倍，求椭圆的标准方程。",
     "solution": "需分两种情况讨论：\n\n(1) 当 $A(2,0)$ 为长轴端点时：\n此时长轴在 $x$ 轴上，故 $a=2$。\n由题意，长轴长是短轴长的 $2$ 倍，即 $2a=2(2b) \\implies a=2b$，得 $b=1$。\n椭圆标准方程为：\n$$\\frac{x^2}{4} + \\frac{y^2}{1} = 1$$\n\n(2) 当 $A(2,0)$ 为短轴端点时：\n此时短轴在 $x$ 轴上，故 $b=2$。\n由题意，$a=2b=4$，长轴在 $y$ 轴上。\n椭圆标准方程为：\n$$\\frac{x^2}{4} + \\frac{y^2}{16} = 1$$\n\n综上，椭圆的标准方程为 $\\frac{x^2}{4} + y^2 = 1$ 或 $\\frac{x^2}{4} + \\frac{y^2}{16} = 1$。"
-}
-
+  }
 ]

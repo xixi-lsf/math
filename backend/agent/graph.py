@@ -32,12 +32,14 @@ def should_retry_generation(state: AgentState) -> Literal["problem_generation", 
         return "fallback"
     return "drawing"
 
-#决定绘图失败后是重试绘图，还是结束
-def should_retry_drawing(state: AgentState) -> Literal["retry_draw", "done"]:
+#决定绘图失败后是重试绘图，走绘图fallback，还是结束
+def should_retry_drawing(state: AgentState) -> Literal["retry_draw", "drawing_fallback", "done"]:
     error = state.get("drawing_error")
     retry = state.get("drawing_retry_count", 0)
     if error and retry < _MAX_DRAWING_RETRIES:
         return "retry_draw"
+    if error and retry >= _MAX_DRAWING_RETRIES:
+        return "drawing_fallback"
     return "done"
 
 
@@ -95,7 +97,7 @@ def build_graph() -> StateGraph:
     g.add_conditional_edges(
         "drawing",
         should_retry_drawing,
-        {"retry_draw": "drawing", "done": "finalize"},
+        {"retry_draw": "drawing", "drawing_fallback": "fallback", "done": "finalize"},
     )
 
     #结束边

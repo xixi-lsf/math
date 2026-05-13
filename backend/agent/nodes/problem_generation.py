@@ -146,12 +146,21 @@ def problem_generation_node(state: AgentState) -> dict:
             {"role": "user", "content": user_prompt},
         ],
         temperature=0.8,
-        max_tokens=600,
+        max_tokens=2000,
+        extra_body={"thinking": {"type": "disabled"}},
     )
     #response.choices：一个列表，包含模型生成的多个候选回复
     #choices[0]：取第一个候选
     #.message：该候选中的 message 对象，包含 role（assistant）和 content（文本内容）
-    latex_problem = response.choices[0].message.content.strip()
+    choice = response.choices[0]
+    import sys
+    print(f"[problem_generation] finish_reason={choice.finish_reason!r} usage={response.usage}", file=sys.stderr)
+    latex_problem = (choice.message.content or "").strip()
+    if not latex_problem:
+        raise ValueError(
+            f"problem_generation LLM returned empty content. "
+            f"finish_reason={choice.finish_reason!r}, usage={response.usage}"
+        )
 
     step = ReasoningStep(
         step_id=step_id,
@@ -233,6 +242,8 @@ _PARAM_SCHEMA = {
 
 def param_extraction_node(state: AgentState) -> dict:
     latex_problem = state.get("latex_problem", "")
+    if not latex_problem:
+        raise ValueError("param_extraction_node: latex_problem is empty, cannot extract params")
     step_id = state.get("step_counter", 0)
     llm = _get_llm(state)
     cfg = state.get("llm_config", {})
@@ -275,11 +286,18 @@ def param_extraction_node(state: AgentState) -> dict:
         ],
         response_format={"type": "json_object"},
         temperature=0.1,
-        max_tokens=800,
+        max_tokens=4000,
+        extra_body={"thinking": {"type": "disabled"}},
     )
 
     #解析 JSON 并构建对象
-    raw_json = response.choices[0].message.content.strip()
+    raw_json = (response.choices[0].message.content or "").strip()
+    if not raw_json:
+        raise ValueError(
+            f"param_extraction LLM returned empty content. "
+            f"finish_reason={response.choices[0].finish_reason!r}, "
+            f"usage={response.usage}"
+        )
     data = json.loads(raw_json)
 
     # Map topic "polar" → "polar_conic" for ConicParams
@@ -287,7 +305,7 @@ def param_extraction_node(state: AgentState) -> dict:
     fallback_curve = _topic_to_curve.get(state["topic"], state["topic"])
 
     # Build ProblemParams from extracted data
-    raw_curve = data.get("curve_type", fallback_curve)
+    raw_curve = data.get("curve_type") or fallback_curve
     # Normalize in case LLM returns "polar" instead of "polar_conic"
     raw_curve = _topic_to_curve.get(raw_curve, raw_curve)
     conic = ConicParams(

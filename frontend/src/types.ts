@@ -34,6 +34,7 @@ export const NODE_LABELS: Record<string, string> = {
   validation: '数学验证',
   drawing: '配图生成',
   solution_generation: '解题步骤',
+  fallback: '题库兜底',
   finalize: '完成',
 }
 
@@ -44,5 +45,6 @@ export const NODE_COLORS: Record<string, string> = {
   validation: 'bg-amber-100 text-amber-800 border-amber-200',
   drawing: 'bg-green-100 text-green-800 border-green-200',
   solution_generation: 'bg-teal-100 text-teal-800 border-teal-200',
+  fallback: 'bg-orange-100 text-orange-800 border-orange-200',
   finalize: 'bg-slate-100 text-slate-800 border-slate-200',
 }
